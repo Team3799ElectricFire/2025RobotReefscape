@@ -4,29 +4,36 @@
 
 package frc.robot.Subsystems;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 import java.util.Arrays;
+import java.util.Optional;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
-public class Cameras extends SubsystemBase {
+public class Cameras {
   private PhotonCamera LowCamera = new PhotonCamera(Constants.LowCameraName);
   private PhotonCamera HighFcamera = new PhotonCamera(Constants.HighFrontCameraName);
   private PhotonCamera HighBcamera = new PhotonCamera(Constants.HighBackCameraName);
   private Alliance ourAlliance = Alliance.Red;
+  AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+  PhotonPoseEstimator LowCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToLowCam);
+  PhotonPoseEstimator HighFrontCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighFrontCam);
+  PhotonPoseEstimator HighBackCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighBackCam);
 
   /** Creates a new Cameras. */
   public Cameras() {
   }
-
-  @Override
-  public void periodic() {
-
-  }
-
+ 
   public void setLowDriverMode(boolean newMode) {
     LowCamera.setDriverMode(newMode);
   }
@@ -53,6 +60,48 @@ public class Cameras extends SubsystemBase {
 
   public void setAlliance(Alliance color) {
     ourAlliance = color;
+  }
+
+  public Optional<EstimatedRobotPose> getEstimatedPoseLowCamera(){
+    var results = LowCamera.getAllUnreadResults();
+    if (!results.isEmpty()) {
+      // Camera processed a new frame since last
+      // Get the last one in the list.
+      var result = results.get(results.size() - 1);
+      if (result.hasTargets()) {
+        // At least one AprilTag was seen by the camera
+        return LowCameraPoseEstimator.update(result);
+      }
+    }
+    return Optional.empty();
+  }
+
+  public Optional<EstimatedRobotPose> getEstimatedPoseHighFrontCamera(){
+    var results = HighFcamera.getAllUnreadResults();
+    if (!results.isEmpty()) {
+      // Camera processed a new frame since last
+      // Get the last one in the list.
+      var result = results.get(results.size() - 1);
+      if (result.hasTargets()) {
+        // At least one AprilTag was seen by the camera
+        return HighFrontCameraPoseEstimator.update(result);
+      }
+    }
+    return Optional.empty();
+  }
+
+  public Optional<EstimatedRobotPose> getEstimatedPoseHighBackCamera(){
+    var results = HighBcamera.getAllUnreadResults();
+    if (!results.isEmpty()) {
+      // Camera processed a new frame since last
+      // Get the last one in the list.
+      var result = results.get(results.size() - 1);
+      if (result.hasTargets()) {
+        // At least one AprilTag was seen by the camera
+        return HighBackCameraPoseEstimator.update(result);
+      }
+    }
+    return Optional.empty();
   }
 
   public double getAngleToProcessor() {
@@ -119,7 +168,7 @@ public class Cameras extends SubsystemBase {
     }
   }
 
-  public double getAngleToReef(){
+  public double getAngleToReef() {
     boolean targetVisible = false;
     double targetYaw = 0.0;
 
@@ -132,7 +181,7 @@ public class Cameras extends SubsystemBase {
         // At least one AprilTag was seen by the camera
         for (var target : result.getTargets()) {
           if (ourAlliance == Alliance.Red && isMember(Constants.RedReef, target.getFiducialId())) {
-            // Found tag 6, 7, 8, 9, 10, or 11 
+            // Found tag 6, 7, 8, 9, 10, or 11
             targetYaw = target.getYaw();
             targetVisible = true;
           } else if (ourAlliance == Alliance.Blue && isMember(Constants.BlueReef, target.getFiducialId())) {

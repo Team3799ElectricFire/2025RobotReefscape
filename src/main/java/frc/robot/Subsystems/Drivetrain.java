@@ -8,14 +8,17 @@ import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -41,18 +44,19 @@ public class Drivetrain extends SubsystemBase {
 
   // Gyro sensor
   private WPI_PigeonIMU Pidgey = new WPI_PigeonIMU(Constants.PidgeonID);
+  
+  // Pose Estimator for tracking robot pose
+  private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+    Constants.kDriveKinematics, 
+    Pidgey.getRotation2d(), 
+    new SwerveModulePosition[] {
+      FrontRightModule.getPosition(),
+      FrontLeftModule.getPosition(),
+      BackRightModule.getPosition(),
+      BackLeftModule.getPosition()
+  }, getPose());
 
-  // Odometry class for tracking robot pose
-  SwerveDriveOdometry Odometry = new SwerveDriveOdometry(
-      Constants.kDriveKinematics,
-      Pidgey.getRotation2d(),
-      new SwerveModulePosition[] {
-          FrontRightModule.getPosition(),
-          FrontLeftModule.getPosition(),
-          BackRightModule.getPosition(),
-          BackLeftModule.getPosition()
-      });
-
+  private Cameras eyeballCameras = new Cameras();
   private boolean _DriveRobotRelative = true;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
@@ -91,7 +95,7 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    Odometry.update(Pidgey.getRotation2d(), new SwerveModulePosition[] {
+    poseEstimator.update(Pidgey.getRotation2d(), new SwerveModulePosition[] {
         FrontRightModule.getPosition(),
         FrontLeftModule.getPosition(),
         BackRightModule.getPosition(),
@@ -100,11 +104,11 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Pose2d getPose() {
-    return Odometry.getPoseMeters();
+    return poseEstimator.getEstimatedPosition();
   }
 
   public void resetPose(Pose2d pose) {
-    Odometry.resetPosition(
+    poseEstimator.resetPosition(
         Pidgey.getRotation2d(),
         new SwerveModulePosition[] {
             FrontRightModule.getPosition(),
@@ -113,6 +117,12 @@ public class Drivetrain extends SubsystemBase {
             BackLeftModule.getPosition()
         },
         pose);
+  }
+
+  public void addVisionMeasurement(Pose2d visionRobotPoseMeters,
+      double timestampSeconds,
+      Matrix<N3, N1> visionMeasurementStdDevs) {
+    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
@@ -130,6 +140,13 @@ public class Drivetrain extends SubsystemBase {
     FrontLeftModule.setDesiredState(moduleStates[1]);
     BackRightModule.setDesiredState(moduleStates[2]);
     BackLeftModule.setDesiredState(moduleStates[3]);
+
+    /*var EstimatedPose = eyeballCameras.getEstimatedPoseLowCamera();
+    if (EstimatedPose.isPresent()){
+      var result = EstimatedPose.get();
+      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds, null);
+    }*/
+    
   }
 
   public void driveRobotRelative(double xSpeed, double ySpeed, double rot) {
