@@ -1,6 +1,6 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// the WPILib BSD license fildoublee in the root directory of this project.
 
 package frc.robot.Subsystems;
 
@@ -16,6 +16,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Cameras {
   private PhotonCamera LowCamera = new PhotonCamera(Constants.LowCameraName);
@@ -33,7 +34,7 @@ public class Cameras {
   /** Creates a new Cameras. */
   public Cameras() {
   }
- 
+
   public void setLowDriverMode(boolean newMode) {
     LowCamera.setDriverMode(newMode);
   }
@@ -62,7 +63,7 @@ public class Cameras {
     ourAlliance = color;
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedPoseLowCamera(){
+  public Optional<EstimatedRobotPose> getEstimatedPoseLowCamera() {
     var results = LowCamera.getAllUnreadResults();
     if (!results.isEmpty()) {
       // Camera processed a new frame since last
@@ -76,7 +77,7 @@ public class Cameras {
     return Optional.empty();
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedPoseHighFrontCamera(){
+  public Optional<EstimatedRobotPose> getEstimatedPoseHighFrontCamera() {
     var results = HighFcamera.getAllUnreadResults();
     if (!results.isEmpty()) {
       // Camera processed a new frame since last
@@ -90,7 +91,7 @@ public class Cameras {
     return Optional.empty();
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedPoseHighBackCamera(){
+  public Optional<EstimatedRobotPose> getEstimatedPoseHighBackCamera() {
     var results = HighBcamera.getAllUnreadResults();
     if (!results.isEmpty()) {
       // Camera processed a new frame since last
@@ -104,99 +105,100 @@ public class Cameras {
     return Optional.empty();
   }
 
-  public double getAngleToProcessor() {
-    boolean targetVisible = false;
-    double targetYaw = 0.0;
-
-    var results = HighFcamera.getAllUnreadResults();
-    if (!results.isEmpty()) {
+  public Optional<Double> getAngleToProcessor() {
+    var frames = HighFcamera.getAllUnreadResults();
+    PhotonTrackedTarget target = null;
+    if (!frames.isEmpty()) {
       // Camera processed a new frame since last
       // Get the last one in the list.
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
+      var latestFrame = frames.get(frames.size() - 1);
+      if (latestFrame.hasTargets()) {
         // At least one AprilTag was seen by the camera
-        for (var target : result.getTargets()) {
-          if (ourAlliance == Alliance.Red && target.getFiducialId() == Constants.RedProcessorTag) {
+        for (var detection : latestFrame.getTargets()) {
+          if (ourAlliance == Alliance.Red && detection.getFiducialId() == Constants.RedProcessorTag) {
             // Found tag 3
-            targetYaw = target.getYaw();
-            targetVisible = true;
-          } else if (ourAlliance == Alliance.Blue && target.getFiducialId() == Constants.BlueProcessorTag) {
+            if (target == null || detection.area > target.area) {
+              target = detection;
+            }
+          } else if (ourAlliance == Alliance.Blue && detection.getFiducialId() == Constants.BlueProcessorTag) {
             // Found Tag 16, record its information
-            targetYaw = target.getYaw();
-            targetVisible = true;
+            if (target == null || detection.area > target.area) {
+              target = detection;
+            }
           }
         }
       }
     }
-
-    if (targetVisible) {
-      return targetYaw;
+    if (target != null) {
+      return Optional.of(target.getYaw());
     } else {
-      return -999;
+      return Optional.empty();
     }
   }
 
-  public double getAngleToCoralStation() {
-    boolean targetVisible = false;
-    double targetYaw = 0.0;
+  public Optional<Double> getAngleToCoralStation() {
+    var frames = HighBcamera.getAllUnreadResults();
+    PhotonTrackedTarget target = null;
 
-    var results = HighBcamera.getAllUnreadResults();
-    if (!results.isEmpty()) {
+    if (!frames.isEmpty()) {
       // Camera processed a new frame since last
       // Get the last one in the list.
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
+      var latestFrame = frames.get(frames.size() - 1);
+      if (latestFrame.hasTargets()) {
         // At least one AprilTag was seen by the camera
-        for (var target : result.getTargets()) {
-          if (ourAlliance == Alliance.Red && isMember(Constants.RedCoralstation, target.getFiducialId())) {
+        for (var detection : latestFrame.getTargets()) {
+          if (ourAlliance == Alliance.Red && isMember(Constants.RedCoralstation, detection.getFiducialId())) {
             // Found tag 1 or 2
-            targetYaw = target.getYaw();
-            targetVisible = true;
-          } else if (ourAlliance == Alliance.Blue && isMember(Constants.BlueCoralstation, target.getFiducialId())) {
+            if (target == null || detection.area > target.area) {
+              target = detection;
+            }
+          } else if (ourAlliance == Alliance.Blue && isMember(Constants.BlueCoralstation, detection.getFiducialId())) {
             // Found Tag 12 or 13, record its information
-            targetYaw = target.getYaw();
-            targetVisible = true;
+            if (target == null || detection.area > target.area) {
+              target = detection;
+            }
           }
         }
       }
     }
 
-    if (targetVisible) {
-      return targetYaw;
+    if (target != null) {
+      return Optional.of(target.getYaw());
     } else {
-      return -999;
+      return Optional.empty();
     }
   }
 
-  public double getAngleToReef() {
-    boolean targetVisible = false;
-    double targetYaw = 0.0;
+  public Optional<Double> getAngleToReef() {
+    var frames = LowCamera.getAllUnreadResults();
+    PhotonTrackedTarget target = null;
 
-    var results = LowCamera.getAllUnreadResults();
-    if (!results.isEmpty()) {
+    if (!frames.isEmpty()) {
       // Camera processed a new frame since last
       // Get the last one in the list.
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
+      var latestframe = frames.get(frames.size() - 1);
+      if (latestframe.hasTargets()) {
         // At least one AprilTag was seen by the camera
-        for (var target : result.getTargets()) {
-          if (ourAlliance == Alliance.Red && isMember(Constants.RedReef, target.getFiducialId())) {
+        for (var detection : latestframe.getTargets()) {
+          if (ourAlliance == Alliance.Red && isMember(Constants.RedReef, detection.getFiducialId())) {
             // Found tag 6, 7, 8, 9, 10, or 11
-            targetYaw = target.getYaw();
-            targetVisible = true;
-          } else if (ourAlliance == Alliance.Blue && isMember(Constants.BlueReef, target.getFiducialId())) {
+            if (target == null || detection.area > target.area) {
+              target = detection;
+            }
+          } else if (ourAlliance == Alliance.Blue && isMember(Constants.BlueReef, detection.getFiducialId())) {
             // Found Tag 17, 18, 19, 20, 21 or 22 , record its information
-            targetYaw = target.getYaw();
-            targetVisible = true;
+            if (target == null || detection.area > target.area) {
+              target = detection;
+            }
           }
         }
       }
     }
 
-    if (targetVisible) {
-      return targetYaw;
+    if (target != null) {
+      return Optional.of(target.getYaw());
     } else {
-      return -999;
+      return Optional.empty();
     }
   }
 

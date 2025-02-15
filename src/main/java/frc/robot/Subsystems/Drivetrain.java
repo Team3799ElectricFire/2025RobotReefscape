@@ -57,7 +57,7 @@ public class Drivetrain extends SubsystemBase {
       BackLeftModule.getPosition()
   }, getPose());
 
-  private Cameras eyeballCameras = new Cameras();
+  public Cameras eyeballCameras = new Cameras();
   private boolean _DriveRobotRelative = true;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();

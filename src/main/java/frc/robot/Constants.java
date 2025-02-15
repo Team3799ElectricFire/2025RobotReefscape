@@ -123,6 +123,12 @@ public class Constants {
     public static final double WristSoftLimMax = 40;//degree
     public static final double WristSoftLimMin = -15;//degree
 
+    // Driving Constants
+    public static final double panRateOfChangeLimit = 8.0; // Translation Drive Demand Rate-of-Change Limit, units/sec
+    public static final double rotRateOfChangeLimit = 8.0; // Rotation Drive Demand Rate-of-Change Limit, units/sec
+    public static final double teleAngleHoldFactor = 0.035; // Teleop heading maintaining P-gain, 1/degrees
+    public static final double teleCameraHoldFactor = 0.010; // Teleop vision targeting P-gain, 1/degrees
+
     // Path Planner
     public static final double MassKG = 30;
     public static final double MOI = 20;
