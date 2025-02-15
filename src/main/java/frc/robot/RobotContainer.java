@@ -61,11 +61,15 @@ public class RobotContainer {
     Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
 
     // Coral 
-    Gamepad.leftBumper().whileTrue(new PickUpCoral(CoralIntake));
-    Gamepad.leftBumper().onFalse(new ConditionalCommand(
-      new InstantCommand(() -> {Elevate.SetSoftMax(Constants.ElevatorSoftLimMax);}),
-      new InstantCommand(() -> {Elevate.SetSoftMax(Constants.ElevatorSoftLimCoral);}),
-      CoralIntake::IsSafeCoral));
+    Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
+      new PickUpCoral(CoralIntake),
+      Drivetrain.TurnOnBackCameraCommand()));
+    Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
+      new ConditionalCommand(
+        new InstantCommand(() -> {Elevate.SetSoftMax(Constants.ElevatorSoftLimMax);}), 
+        new InstantCommand(() -> {Elevate.SetSoftMax(Constants.ElevatorSoftLimCoral);}),
+        CoralIntake::IsSafeCoral),
+      Drivetrain.TurnOffBackCameraCommand()));
     Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
       new ScoreCoralLow(CoralIntake), 
       new ScoreCoral(CoralIntake), 

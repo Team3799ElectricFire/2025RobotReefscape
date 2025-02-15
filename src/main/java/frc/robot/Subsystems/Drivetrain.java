@@ -126,6 +126,31 @@ public class Drivetrain extends SubsystemBase {
     poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
+  public Command TurnOnBackCameraCommand(){
+    return runOnce(() -> {eyeballCameras.setHighBDriverMode(false);});
+  }
+
+  public Command TurnOffBackCameraCommand(){
+    return runOnce(() -> {eyeballCameras.setHighBDriverMode(true);});
+  }
+
+  public Command TurnOnHighFCameraCommand(){
+    return runOnce(() -> {eyeballCameras.setHighFDriverMode(false);});
+  }
+
+  public Command TurnOffHighFCameraCommand(){
+    return runOnce(() -> {eyeballCameras.setHighFDriverMode(true);});
+  }
+
+  public Command TurnOnLowCameraCommand(){
+    return runOnce(() -> {eyeballCameras.setLowDriverMode(false);});
+  }
+
+  public Command TurnOffLowCameraCommand(){
+    return runOnce(() -> {eyeballCameras.setLowDriverMode(true);});
+  }
+
+
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return Constants.kDriveKinematics.toChassisSpeeds(getModuleState());
   }
