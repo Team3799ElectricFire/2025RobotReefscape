@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.*;
 import frc.robot.Subsystems.*;
@@ -56,28 +57,42 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+    // Drivetrain 
     Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
+
+    // Coral 
     Gamepad.leftBumper().whileTrue(new PickUpCoral(CoralIntake));
     Gamepad.leftBumper().onFalse(new ConditionalCommand(
       new InstantCommand(() -> {Elevate.SetSoftMax(Constants.ElevatorSoftLimMax);}),
       new InstantCommand(() -> {Elevate.SetSoftMax(Constants.ElevatorSoftLimCoral);}),
       CoralIntake::IsSafeCoral));
-
-
-    Gamepad.povDown().whileTrue(new ClimberDown(Climber));
-    Gamepad.povUp().whileTrue(new ClimberUp(Climber));
-    Gamepad.rightBumper().whileTrue(new PickUpAlgae(Algae));
-    Gamepad.rightTrigger().whileTrue(new ScoreAlgae(Algae));
-
-    Gamepad.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
-    Gamepad.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
-    Gamepad.x().onTrue(Wrost.GoToPositionCommand(Constants.WristPickUp));
-    Gamepad.y().onTrue(Wrost.GoToPositionCommand(Constants.WristStart));
-
     Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
       new ScoreCoralLow(CoralIntake), 
       new ScoreCoral(CoralIntake), 
       Elevate::IsLow));
+
+    // Algae
+    Gamepad.rightBumper().whileTrue(new SequentialCommandGroup(
+      Wrost.GoToPositionCommand(Constants.WristPickUp), 
+      Elevate.GoToPositionCommand(Constants.ElevatorLevel1),
+      new PickUpAlgae(Algae)));
+    Gamepad.rightBumper().onFalse(Wrost.GoToPositionCommand(Constants.WristTravel));
+    Gamepad.rightTrigger().whileTrue(new SequentialCommandGroup(
+      Wrost.GoToPositionCommand(Constants.WristScore),
+      new ScoreAlgae(Algae)));
+    Gamepad.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
+
+    // Climber
+    Gamepad.povDown().whileTrue(new ClimberDown(Climber));
+    Gamepad.povUp().whileTrue(new ClimberUp(Climber));
+
+    // Elevator
+    Gamepad.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
+    Gamepad.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
+    Gamepad.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
+    Gamepad.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+
+    Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
   }
 
   public Command getAutonomousCommand() {

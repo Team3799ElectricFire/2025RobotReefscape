@@ -20,6 +20,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -249,6 +250,10 @@ public class Drivetrain extends SubsystemBase {
     Pidgey.reset();
   }
 
+  public Command ZeroHeadingCommand(){
+    return run(() -> {zeroHeading();});
+  }
+  
   public double getHeading() {
     return Pidgey.getRotation2d().getDegrees();
   }
@@ -311,50 +316,5 @@ public class Drivetrain extends SubsystemBase {
     RotationCenter = new Translation2d();
   }
 
-  /*
-   * public void setTargetNone() {
-   * targetFiducialID = AprilTagIDs.NoTarget;
-   * }
-   * public void setTargetAmp() {
-   * //Check Alliance Color :
-   * https://docs.wpilib.org/en/stable/docs/software/basic-programming/
-   * alliancecolor.html
-   * Optional<Alliance> ally = DriverStation.getAlliance();
-   * if (ally.isPresent()) {
-   * if (ally.get() == Alliance.Red) {
-   * targetFiducialID = AprilTagIDs.RedAmp;
-   * }
-   * if (ally.get() == Alliance.Blue) {
-   * targetFiducialID = AprilTagIDs.BlueAmp;
-   * }
-   * } else {
-   * targetFiducialID = AprilTagIDs.NoTarget;
-   * }
-   * }
-   * public void setTargetSpeaker() {
-   * //Check Alliance Color:
-   * https://docs.wpilib.org/en/stable/docs/software/basic-programming/
-   * alliancecolor.html
-   * Optional<Alliance> ally = DriverStation.getAlliance();
-   * if (ally.isPresent()) {
-   * if (ally.get() == Alliance.Red) {
-   * targetFiducialID = AprilTagIDs.RedSpeaker;
-   * }
-   * if (ally.get() == Alliance.Blue) {
-   * targetFiducialID = AprilTagIDs.BlueSpeaker;
-   * }
-   * } else {
-   * targetFiducialID = AprilTagIDs.NoTarget;
-   * }
-   * }
-   * public int getTargetID() {
-   * return targetFiducialID;
-   * }
-   * public Command TargetAmpCommand() {
-   * return this.startEnd(this::setTargetAmp, this::setTargetNone).asProxy();
-   * }
-   * public Command TargetSpeakerCommand() {
-   * return this.startEnd(this::setTargetSpeaker, this::setTargetNone).asProxy();
-   * }
-   */
+  
 }
