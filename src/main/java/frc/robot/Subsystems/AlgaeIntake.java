@@ -9,23 +9,16 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class AlgaeIntake extends SubsystemBase {
-  private SparkMax LeftMotor = new SparkMax(Constants.AlgaeLeftMotorID, MotorType.kBrushless);
-  private SparkMax RightMotor = new SparkMax(Constants.AlgaeRightMotorID, MotorType.kBrushless);
+  private SparkMax AlgaeMotor = new SparkMax(Constants.AlgaeMotorID, MotorType.kBrushless);
 
   /** Creates a new AlgaeIntake. */
   public AlgaeIntake() {
-    SparkMaxConfig leftConfig = new SparkMaxConfig();
-    leftConfig.inverted(true);
-    leftConfig.follow(Constants.AlgaeRightMotorID);
-    LeftMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    
     SparkMaxConfig rightConfig = new SparkMaxConfig();
-    RightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    AlgaeMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
@@ -34,17 +27,18 @@ public class AlgaeIntake extends SubsystemBase {
   }
 
   public void AlgaeTakeIn() {
-    RightMotor.set(Constants.AlgaeIntakeSpeed);
-
+    AlgaeMotor.set(Constants.AlgaeIntakeSpeed);
   }
+
   public void AlgaeTakeOut() {
-    RightMotor.set(-1 * Constants.AlgaeOutakeSpeed);
+    AlgaeMotor.set(-1 * Constants.AlgaeOutakeSpeed);
+  }
 
-  }
   public void AlgaeHold() {
-    RightMotor.set(Constants.AlgaeHold);
+    AlgaeMotor.set(Constants.AlgaeHold);
   }
-  public void AlgaeStop (){
-    RightMotor.set(0);
+
+  public void AlgaeStop() {
+    AlgaeMotor.set(0);
   }
 }

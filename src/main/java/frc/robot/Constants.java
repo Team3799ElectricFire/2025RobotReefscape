@@ -49,14 +49,12 @@ public class Constants {
     public static final int PidgeonID = 9;
     public static final int ElevatorLeftMotorID = 10;
     public static final int ElevatorRightMotorID = 11;
-    public static final int ClimberLeftMotorID = 12;
-    public static final int ClimberRightMotorID = 13;
-    public static final int WristLeftMotorID = 14;
-    public static final int WristRightMotorID = 15;
-    public static final int CoralLeftMotorID = 16;
-    public static final int CoralRightMotorID = 17;
-    public static final int AlgaeLeftMotorID = 18;
-    public static final int AlgaeRightMotorID = 19;
+    public static final int ClimberMotorID = 12;
+    public static final int WristLeftMotorID = 13;
+    public static final int WristRightMotorID = 14;
+    public static final int CoralLeftMotorID = 15;
+    public static final int CoralRightMotorID = 16;
+    public static final int AlgaeMotorID = 17;
 
     // DIO Channels
     public static final int CoralTopSwitch = 3;
