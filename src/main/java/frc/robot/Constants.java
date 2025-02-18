@@ -24,7 +24,7 @@ public class Constants {
     // Conversion factors
     public static final double DriveMotorVelocityFactor = 8.6895843e-4;
     public static final double SteerMotorPositionFactor = 2 * Math.PI;
-    public static final double ClimberPositionConversionFactor = 1.38888888888;
+    public static final double ClimberPositionConversionFactor = 1.0/125.0;
     public static final double WristPositionConversionFactor = 1.66666666666;
     public static final double ElevatorPositionConversionFactor = 0.55889435962;
 
@@ -133,7 +133,7 @@ public class Constants {
     public static final ModuleConfig SwerveConfig = new ModuleConfig(
             Units.inchesToMeters(2),
             kMaxSpeedMetersPerSecond,
-            1.0, // TODO DOUBLE CHECK
+            1.0, 
             DCMotor.getNeoVortex(1),
             50,
             1);
