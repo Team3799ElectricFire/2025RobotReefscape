@@ -4,9 +4,9 @@
 
 package frc.robot.Subsystems;
 
-import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.reduxrobotics.sensors.canandgyro.Canandgyro;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -44,7 +44,7 @@ public class Drivetrain extends SubsystemBase {
       Constants.kBackLeftChassisAngularOffset);
 
   // Gyro sensor
-  private WPI_PigeonIMU Pidgey = new WPI_PigeonIMU(Constants.PidgeonID);
+  private Canandgyro Pidgey = new Canandgyro(Constants.PidgeonID);
   
   // Pose Estimator for tracking robot pose
   private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
@@ -272,7 +272,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public void zeroHeading() {
-    Pidgey.reset();
+    Pidgey.setYaw(0.0);
   }
 
   public Command ZeroHeadingCommand(){
@@ -281,10 +281,6 @@ public class Drivetrain extends SubsystemBase {
   
   public double getHeading() {
     return Pidgey.getRotation2d().getDegrees();
-  }
-
-  public double getTurnRate() {
-    return Pidgey.getRate();
   }
 
   public double getPitch() {

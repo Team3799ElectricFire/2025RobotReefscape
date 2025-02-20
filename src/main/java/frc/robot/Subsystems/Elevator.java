@@ -49,16 +49,16 @@ public class Elevator extends SubsystemBase {
 
     PIDController = RightMotor.getClosedLoopController();
 
+    if (AtBottom()) {
+      zeroEncoder();
+    }
     GoToPosition(getHeight());
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (AtBottom() && (getHeight() > 5 || getHeight() < -5)){
-      zeroEncoder();
-    }
-  }
+     }
 
   public void ElevatorUp() {
     RightMotor.set(Constants.ElevatorSpeed);

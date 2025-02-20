@@ -46,15 +46,15 @@ public class Wrist extends SubsystemBase {
     
     PID = RightMotor.getClosedLoopController();
 
+    if (AtHome()) {
+      HomeEncoder();
+    }
     SetReference(getAngle()); 
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (AtHome() && (getAngle() > Constants.WristStart + 5 || getAngle() < Constants.WristStart - 5)) {
-      HomeEncoder();
-    }
   }
 
   public void WristUp() {
