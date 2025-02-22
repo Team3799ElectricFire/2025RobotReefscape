@@ -14,12 +14,13 @@ import edu.wpi.first.math.util.Units;
 
 public class Constants {
     // PID swerve constants
-    public static final double SteeringPgain = 0;
-    public static final double SteeringIgain = 0;
-    public static final double SteeringDgain = 0;
-    public static final double DrivingPgain = 0;
+    public static final double SteeringPgain = 2.5;
+    public static final double SteeringIgain = 0.001;
+    public static final double SteeringDgain = 3; // Max derivative gain is 3 (according to REV hardware client)
+    public static final double DrivingPgain = 0.1;
     public static final double DrivingIgain = 0;
     public static final double DrivingDgain = 0;
+    public static final double DrivingFFgain = 1.0/565.0;
 
     // Conversion factors
     public static final double DriveMotorVelocityFactor = 8.6895843e-4;
@@ -32,29 +33,29 @@ public class Constants {
     public static final double kMinSpeedMetersPerSecond = 0.1;
     public static final double kMaxSpeedMetersPerSecond = Units.feetToMeters(19.3);
     public static final double kMaxAngularSpeed = Units.degreesToRadians(360);
-    public static final double kFrontRightChassisAngularOffset = 0;
-    public static final double kFrontLeftChassisAngularOffset = -Math.PI / 2;
-    public static final double kBackRightChassisAngularOffset = Math.PI / 2;
-    public static final double kBackLeftChassisAngularOffset = Math.PI;
+    public static final double kFrontRightChassisAngularOffset = 58.99/360.0;
+    public static final double kFrontLeftChassisAngularOffset = 177.35/360.0;
+    public static final double kBackRightChassisAngularOffset = 130.29/360.0;
+    public static final double kBackLeftChassisAngularOffset = 288.00/360.0;
 
     // CanbusID
-    public static final int FrontRightDriveMotorID = 1;
-    public static final int FrontRightSteerMotorID = 2;
-    public static final int FrontLeftDriveMotorID = 3;
-    public static final int FrontLeftSteerMotorID = 4;
-    public static final int BackRightDriveMotorID = 5;
-    public static final int BackRightSteerMotorID = 6;
-    public static final int BackLeftDriveMotorID = 7;
-    public static final int BackLeftSteerMotorID = 8;
-    public static final int PidgeonID = 9;
-    public static final int ElevatorLeftMotorID = 10;
-    public static final int ElevatorRightMotorID = 11;
-    public static final int ClimberMotorID = 12;
-    public static final int WristLeftMotorID = 13;
-    public static final int WristRightMotorID = 14;
-    public static final int CoralLeftMotorID = 15;
-    public static final int CoralRightMotorID = 16;
-    public static final int AlgaeMotorID = 17;
+    public static final int FrontRightDriveMotorID = 8;
+    public static final int FrontRightSteerMotorID = 7;
+    public static final int FrontLeftDriveMotorID = 2;
+    public static final int FrontLeftSteerMotorID = 1;
+    public static final int BackRightDriveMotorID = 6;
+    public static final int BackRightSteerMotorID = 5;
+    public static final int BackLeftDriveMotorID = 4;
+    public static final int BackLeftSteerMotorID = 3;
+    public static final int PidgeonID = 18;
+    public static final int ElevatorLeftMotorID = 19;
+    public static final int ElevatorRightMotorID = 20;
+    public static final int ClimberMotorID = 15;
+    public static final int WristLeftMotorID = 9;
+    public static final int WristRightMotorID = 10;
+    public static final int CoralLeftMotorID = 13;
+    public static final int CoralRightMotorID = 14;
+    public static final int AlgaeMotorID = 11;
 
     // DIO Channels
     public static final int CoralTopSwitch = 3;

@@ -22,7 +22,6 @@ public class SwerveModule {
     private AbsoluteEncoder SteerEncoder;
     private RelativeEncoder DriveEncoder;
     private SparkClosedLoopController DrivePID, SteerPID;
-    private double SteerOffset;
     private SwerveModuleState DesiredState = new SwerveModuleState(0.0, new Rotation2d());
 
     public SwerveModule(int driveMotorID, int steerMotorID, double steerOffset) {
@@ -38,11 +37,9 @@ public class SwerveModule {
         SteerPID = SteerMotor.getClosedLoopController();
         DrivePID = DriveMotor.getClosedLoopController();
 
-        this.SteerOffset = steerOffset;
-
         // Motor Configuration
         SteerConfig = new SparkFlexConfig();
-        SteerConfig.encoder.positionConversionFactor(Constants.SteerMotorPositionFactor);
+        SteerConfig.inverted(true);
         SteerConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
                 // Set PID values for position control. We don't need to pass a closed loop
@@ -53,15 +50,20 @@ public class SwerveModule {
                 .positionWrappingEnabled(true)
                 .positionWrappingInputRange(0, 2 * Math.PI)
                 .outputRange(-1, 1);
+        SteerConfig.absoluteEncoder
+                .positionConversionFactor(Constants.SteerMotorPositionFactor)
+                .zeroOffset(steerOffset);
         SteerMotor.configure(SteerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         DriveConfig = new SparkFlexConfig();
+        DriveConfig.inverted(true);
         DriveConfig.encoder.velocityConversionFactor(Constants.DriveMotorVelocityFactor);
         DriveConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(Constants.DrivingPgain)
                 .i(Constants.DrivingIgain)
                 .d(Constants.DrivingDgain)
+                .velocityFF(Constants.DrivingFFgain)
                 .outputRange(-1, 1);
         DriveMotor.configure(DriveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
@@ -69,7 +71,7 @@ public class SwerveModule {
     public SwerveModuleState getState() {
         return new SwerveModuleState(
                 DriveEncoder.getVelocity(),
-                new Rotation2d(SteerEncoder.getPosition() - SteerOffset));
+                new Rotation2d(SteerEncoder.getPosition()));
     }
 
     public SwerveModuleState getDesiredPosition() {
@@ -79,52 +81,34 @@ public class SwerveModule {
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(
                 DriveEncoder.getPosition(),
-                new Rotation2d(SteerEncoder.getPosition() - SteerOffset));
+                new Rotation2d(SteerEncoder.getPosition()));
     }
 
-    public void setDesiredState(SwerveModuleState desiredState) {
-        // Correct incoming desired state (which is relative to robot) with this modules
-        // offset angle to get a state relative to this modules mounting
-        SwerveModuleState correctedDesiredState = new SwerveModuleState();
-        correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-        correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(SteerOffset));
-
-        // Optimize desired state based on current angle (never rotate module more than
-        // 90degrees)
-        SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(
-                correctedDesiredState,
-                new Rotation2d(SteerEncoder.getPosition()));
+    public void setDesiredState(SwerveModuleState desiredState) {       
+        // Optimize desired state based on current angle (never rotate module more than 90degrees)
+        desiredState.optimize(new Rotation2d(SteerEncoder.getPosition()));
 
         // Always set the driving motor's speed
-        DrivePID.setReference(optimizedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
+        DrivePID.setReference(desiredState.speedMetersPerSecond, ControlType.kVelocity);
 
         // But only set the steering motor's position if the driving motor is moving
-        if (Math.abs(optimizedDesiredState.speedMetersPerSecond) > Constants.kMinSpeedMetersPerSecond) {
-            SteerPID.setReference(optimizedDesiredState.angle.getRadians(), ControlType.kPosition);
+        if (Math.abs(desiredState.speedMetersPerSecond) > Constants.kMinSpeedMetersPerSecond) {
+            SteerPID.setReference(desiredState.angle.getRadians(), ControlType.kPosition);
         }
 
         // Update last recorded desired state
         this.DesiredState = desiredState;
     }
 
-    public void setDesiredStateNoRestrictions(SwerveModuleState desiredState) {
-        // Correct incoming desired state (which is relative to robot) with this modules
-        // offset angle to get a state relative to this modules mounting
-        SwerveModuleState correctedDesiredState = new SwerveModuleState();
-        correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
-        correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(SteerOffset));
-
-        // Optimize desired state based on current angle (never rotate module more than
-        // 90degrees)
-        SwerveModuleState optimizedDesiredState = SwerveModuleState.optimize(
-                correctedDesiredState,
-                new Rotation2d(SteerEncoder.getPosition()));
+    public void setDesiredStateNoRestrictions(SwerveModuleState desiredState) {   
+        // Optimize desired state based on current angle (never rotate module more than 90degrees)
+        desiredState.optimize(new Rotation2d(SteerEncoder.getPosition()));
 
         // Always set the driving motor's speed
-        DrivePID.setReference(optimizedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
+        DrivePID.setReference(desiredState.speedMetersPerSecond, ControlType.kVelocity);
 
         // Always set the steering motor's position
-        SteerPID.setReference(optimizedDesiredState.angle.getRadians(), ControlType.kPosition);
+        SteerPID.setReference(desiredState.angle.getRadians(), ControlType.kPosition);
 
         // Update last recorded desired state
         this.DesiredState = desiredState;

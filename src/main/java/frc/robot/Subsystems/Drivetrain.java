@@ -19,7 +19,10 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -55,18 +58,18 @@ public class Drivetrain extends SubsystemBase {
       FrontLeftModule.getPosition(),
       BackRightModule.getPosition(),
       BackLeftModule.getPosition()
-  }, getPose());
+  }, new Pose2d());
 
   public Cameras eyeballCameras = new Cameras();
   private boolean _DriveRobotRelative = true;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
-  // private int targetFiducialID = AprilTagIDs.NoTarget; // ID number of AprilTag
-  // we are aiming at (0 means no target, aka camera off)
+  private final StructArrayPublisher<SwerveModuleState> publisher;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
-    // PigeonIMUConfiguration config = new PigeonIMUConfiguration();
+    publisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
 
     // Autobuilder
     AutoBuilder.configure(
@@ -102,6 +105,18 @@ public class Drivetrain extends SubsystemBase {
         BackRightModule.getPosition(),
         BackLeftModule.getPosition()
     });
+
+    publisher.set(getModuleState());
+
+    printDS();
+  }
+
+  private void printDS() {
+    SmartDashboard.putNumber("GYRO ANGLE", getHeading());
+    SmartDashboard.putNumber("FL HEADING", FrontLeftModule.getState().angle.getDegrees());
+    SmartDashboard.putNumber("FR HEADING", FrontRightModule.getState().angle.getDegrees());
+    SmartDashboard.putNumber("BL HEADING", BackLeftModule.getState().angle.getDegrees());
+    SmartDashboard.putNumber("BR HEADING", BackRightModule.getState().angle.getDegrees());
   }
 
   public Pose2d getPose() {
@@ -150,7 +165,6 @@ public class Drivetrain extends SubsystemBase {
     return runOnce(() -> {eyeballCameras.setLowDriverMode(true);});
   }
 
-
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return Constants.kDriveKinematics.toChassisSpeeds(getModuleState());
   }
@@ -180,6 +194,10 @@ public class Drivetrain extends SubsystemBase {
     double yVelocityMetersPerSecond = ySpeed * Constants.kMaxSpeedMetersPerSecond;
     double rotationRadiansPerSecond = rot * Constants.kMaxAngularSpeed;
 
+    SmartDashboard.putNumber("Vx", xVelocityMetersPerSecond);
+    SmartDashboard.putNumber("Vy", yVelocityMetersPerSecond);
+    SmartDashboard.putNumber("rot", rotationRadiansPerSecond);
+
     ChassisSpeeds speeds = new ChassisSpeeds(xVelocityMetersPerSecond, yVelocityMetersPerSecond,
         rotationRadiansPerSecond);
 
@@ -190,9 +208,16 @@ public class Drivetrain extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Constants.kMaxSpeedMetersPerSecond * SpeedMultiple);
 
     FrontRightModule.setDesiredState(moduleStates[0]);
+    SmartDashboard.putNumber("FR ANGLE SP", moduleStates[0].angle.getDegrees());
+
     FrontLeftModule.setDesiredState(moduleStates[1]);
+    SmartDashboard.putNumber("FL ANGLE SP", moduleStates[1].angle.getDegrees());
+
     BackRightModule.setDesiredState(moduleStates[2]);
+    SmartDashboard.putNumber("BR ANGLE SP", moduleStates[2].angle.getDegrees());
+
     BackLeftModule.setDesiredState(moduleStates[3]);
+    SmartDashboard.putNumber("BL ANGLE SP", moduleStates[3].angle.getDegrees());
   }
 
   public void driveFieldRelative(double xSpeed, double ySpeed, double rot) {
@@ -337,5 +362,4 @@ public class Drivetrain extends SubsystemBase {
     RotationCenter = new Translation2d();
   }
 
-  
 }
