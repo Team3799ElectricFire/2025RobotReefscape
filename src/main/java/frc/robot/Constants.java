@@ -83,9 +83,9 @@ public class Constants {
     public static final double ElevatorKV = 0;
 
     // Wrist PID
-    public static final double WristKP = 0;
+    public static final double WristKP = 0.75;
     public static final double WristKI = 0;
-    public static final double WristKD = 0;
+    public static final double WristKD = 3;
     public static final double WristKS = 0;
     public static final double WristKG = 0;
     public static final double WristKV = 0;
@@ -105,7 +105,7 @@ public class Constants {
     public static final double CoralShelfSpeed = 0.25;
     public static final double ClimberDownSpeed = -1.0;
     public static final double ClimberUpSpeed = 1.0;
-    public static final double WristSpeed = 0.8;
+    public static final double WristSpeed = 0.6;
 
 
     // Position Set Points

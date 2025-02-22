@@ -24,7 +24,7 @@ public class RobotContainer {
   //private Climber Climber = new Climber();
   //private AlgaeIntake Algae = new AlgaeIntake();
   //private Elevator Elevate = new Elevator();
-  //private Wrist Wrost = new Wrist();
+  private Wrist Wrost = new Wrist();
   //private Cameras Cams = new Cameras();
   private CommandXboxController Gamepad = new CommandXboxController(0);
   private final SendableChooser<Command> autoChooser;
@@ -61,8 +61,8 @@ public class RobotContainer {
     Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
 
     // Coral
-    Gamepad.a().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
-    Gamepad.y().whileTrue(new ScoreCoral(CoralIntake));
+    //Gamepad.a().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
+    //Gamepad.y().whileTrue(new ScoreCoral(CoralIntake));
     /*Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
       new PickUpCoral(CoralIntake),
       Drivetrain.TurnOnBackCameraCommand()));
@@ -78,6 +78,13 @@ public class RobotContainer {
       Elevate::IsLow));*/
 
     // Algae
+    Gamepad.povUp().whileTrue(new WristUp(Wrost));
+    Gamepad.povDown().whileTrue(new WristDown(Wrost));
+    SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
+    SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
+    Gamepad.a().onTrue(Wrost.GoToPositionCommand(Constants.WristPickUp));
+    Gamepad.b().onTrue(Wrost.GoToPositionCommand(Constants.WristTravel));
+    Gamepad.y().onTrue(Wrost.GoToPositionCommand(Constants.WristStart));
     /*Gamepad.rightBumper().whileTrue(new SequentialCommandGroup(
       Wrost.GoToPositionCommand(Constants.WristPickUp), 
       Elevate.GoToPositionCommand(Constants.ElevatorLevel1),
