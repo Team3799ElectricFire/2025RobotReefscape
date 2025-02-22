@@ -21,7 +21,7 @@ public class ScoreCoral extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    Intake.CoralSend();
+    Intake.CoralForward();
   }
 
   // Called every time the scheduler runs while the command is scheduled.

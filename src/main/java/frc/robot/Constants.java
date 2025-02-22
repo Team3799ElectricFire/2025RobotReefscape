@@ -99,9 +99,10 @@ public class Constants {
     public static final double AlgaeIntakeSpeed = 0.5;
     public static final double AlgaeOutakeSpeed = 1.0;
     public static final double AlgaeHold = 0.25;
-    public static final double CoralIntakeSpeed = 0.7;
-    public static final double CoralOutakeSpeed = 0.8;
-    public static final double CoralShelfSpeed = 0.9;
+    public static final double CoralIntakeSpeed = 0.15;
+    public static final double CoralSecureSpeed = -0.10;
+    public static final double CoralOutakeSpeed = 0.2;
+    public static final double CoralShelfSpeed = 0.25;
     public static final double ClimberDownSpeed = -1.0;
     public static final double ClimberUpSpeed = 1.0;
     public static final double WristSpeed = 0.8;

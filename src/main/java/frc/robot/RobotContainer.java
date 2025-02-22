@@ -20,7 +20,7 @@ import frc.robot.Subsystems.*;
 
 public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
-  //private CoralIntake CoralIntake = new CoralIntake();
+  private CoralIntake CoralIntake = new CoralIntake();
   //private Climber Climber = new Climber();
   //private AlgaeIntake Algae = new AlgaeIntake();
   //private Elevator Elevate = new Elevator();
@@ -60,7 +60,9 @@ public class RobotContainer {
     // Drivetrain 
     Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
 
-    // Coral 
+    // Coral
+    Gamepad.a().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
+    Gamepad.y().whileTrue(new ScoreCoral(CoralIntake));
     /*Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
       new PickUpCoral(CoralIntake),
       Drivetrain.TurnOnBackCameraCommand()));
