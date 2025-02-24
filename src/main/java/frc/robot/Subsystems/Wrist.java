@@ -85,7 +85,7 @@ public class Wrist extends SubsystemBase {
   public void SetReference(double newSetPoint) {
     newSetPoint = Math.min(newSetPoint, Constants.WristSoftLimMax);
     newSetPoint = Math.max(newSetPoint, Constants.WristSoftLimMin);
-    PID.setReference(newSetPoint, ControlType.kMAXMotionPositionControl, ClosedLoopSlot.kSlot0, FeedForward.calculate(newSetPoint, 0));
+    PID.setReference(newSetPoint, ControlType.kPosition, ClosedLoopSlot.kSlot0, FeedForward.calculate(newSetPoint, 0));
   }
 
   public boolean AtHome() {

@@ -61,8 +61,8 @@ public class RobotContainer {
     Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
 
     // Coral
-    //Gamepad.a().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
-    //Gamepad.y().whileTrue(new ScoreCoral(CoralIntake));
+    //Gamepad.povUp().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
+    //Gamepad.povDown().whileTrue(new ScoreCoral(CoralIntake));
     /*Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
       new PickUpCoral(CoralIntake),
       Drivetrain.TurnOnBackCameraCommand()));
@@ -82,6 +82,7 @@ public class RobotContainer {
     Gamepad.povDown().whileTrue(new WristDown(Wrost));
     SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
     SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
+    SmartDashboard.putData("Wrist GOTO Pickup Command", Wrost.GoToPositionCommand(Constants.WristPickUp));
     Gamepad.a().onTrue(Wrost.GoToPositionCommand(Constants.WristPickUp));
     Gamepad.b().onTrue(Wrost.GoToPositionCommand(Constants.WristTravel));
     Gamepad.y().onTrue(Wrost.GoToPositionCommand(Constants.WristStart));
