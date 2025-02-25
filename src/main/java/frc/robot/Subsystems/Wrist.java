@@ -44,6 +44,10 @@ public class Wrist extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .pid(Constants.WristKP, Constants.WristKI, Constants.WristKD)
         .outputRange(-1, 1);
+    rightConfig.closedLoop.maxMotion
+        .maxVelocity(Constants.WristMotionMaxVelocity)
+        .maxAcceleration(Constants.WristMotionMaxAcceleration)
+        .allowedClosedLoopError(Constants.WristMotionAllowedError);
     rightConfig.limitSwitch
         .forwardLimitSwitchEnabled(true)
         .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)

@@ -55,7 +55,7 @@ public class Constants {
     public static final int WristRightMotorID = 10;
     public static final int CoralLeftMotorID = 13;
     public static final int CoralRightMotorID = 14;
-    public static final int AlgaeMotorID = 11;
+    public static final int AlgaeMotorID = 12;
 
     // DIO Channels
     public static final int CoralTopSwitch = 3;
@@ -89,6 +89,9 @@ public class Constants {
     public static final double WristKS = 0;
     public static final double WristKG = 0;
     public static final double WristKV = 0;
+    public static final double WristMotionMaxVelocity = 60; // degrees per second
+    public static final double WristMotionMaxAcceleration = 1; // degrees per second^2
+    public static final double WristMotionAllowedError = 1; // degrees
 
     // Motor Speeds
     public static final double TurboSpeedMultiple = 0.90;
@@ -96,9 +99,9 @@ public class Constants {
     public static final double LowSpeedMultiple = 0.50;
     public static final double minThumbstickMagnitude = 0.1;
     public static final double ElevatorSpeed = 0.5;
-    public static final double AlgaeIntakeSpeed = 0.5;
+    public static final double AlgaeIntakeSpeed = 0.3;
     public static final double AlgaeOutakeSpeed = 1.0;
-    public static final double AlgaeHold = 0.25;
+    public static final double AlgaeHold = 0.05;
     public static final double CoralIntakeSpeed = 0.15;
     public static final double CoralSecureSpeed = -0.10;
     public static final double CoralOutakeSpeed = 0.2;

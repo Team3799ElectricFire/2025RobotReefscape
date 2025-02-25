@@ -22,7 +22,7 @@ public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
   private CoralIntake CoralIntake = new CoralIntake();
   //private Climber Climber = new Climber();
-  //private AlgaeIntake Algae = new AlgaeIntake();
+  private AlgaeIntake Algae = new AlgaeIntake();
   //private Elevator Elevate = new Elevator();
   private Wrist Wrost = new Wrist();
   //private Cameras Cams = new Cameras();
@@ -78,14 +78,15 @@ public class RobotContainer {
       Elevate::IsLow));*/
 
     // Algae
-    Gamepad.povUp().whileTrue(new WristUp(Wrost));
-    Gamepad.povDown().whileTrue(new WristDown(Wrost));
+    //Gamepad.povUp().whileTrue(new WristUp(Wrost));
+    //Gamepad.povDown().whileTrue(new WristDown(Wrost));
     SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
     SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
-    SmartDashboard.putData("Wrist GOTO Pickup Command", Wrost.GoToPositionCommand(Constants.WristPickUp));
     Gamepad.a().onTrue(Wrost.GoToPositionCommand(Constants.WristPickUp));
     Gamepad.b().onTrue(Wrost.GoToPositionCommand(Constants.WristTravel));
     Gamepad.y().onTrue(Wrost.GoToPositionCommand(Constants.WristStart));
+    Gamepad.povUp().whileTrue(new PickUpAlgae(Algae));
+    Gamepad.povDown().whileTrue(new ScoreAlgae(Algae));
     /*Gamepad.rightBumper().whileTrue(new SequentialCommandGroup(
       Wrost.GoToPositionCommand(Constants.WristPickUp), 
       Elevate.GoToPositionCommand(Constants.ElevatorLevel1),
