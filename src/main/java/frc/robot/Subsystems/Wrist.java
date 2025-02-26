@@ -39,7 +39,9 @@ public class Wrist extends SubsystemBase {
 
     SparkMaxConfig rightConfig = new SparkMaxConfig();
     rightConfig.idleMode(IdleMode.kBrake);
-    rightConfig.encoder.positionConversionFactor(Constants.WristPositionConversionFactor);
+    rightConfig.encoder
+        .positionConversionFactor(Constants.WristPositionConversionFactor)
+        .velocityConversionFactor(Constants.WristVelocityConversionFactor);
     rightConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .pid(Constants.WristKP, Constants.WristKI, Constants.WristKD)
@@ -64,7 +66,7 @@ public class Wrist extends SubsystemBase {
     if (AtHome()) {
       HomeEncoder();
     }
-    SetReference(getAngle());
+    //SetReference(getAngle());
   }
 
   @Override

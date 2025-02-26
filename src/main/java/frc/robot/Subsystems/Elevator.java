@@ -30,8 +30,7 @@ public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
   public Elevator() {
     SparkFlexConfig leftConfig = new SparkFlexConfig();
-    leftConfig.inverted(true);
-    leftConfig.follow(Constants.ElevatorRightMotorID);
+    leftConfig.follow(Constants.ElevatorRightMotorID, true);
     LeftMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkFlexConfig rightConfig = new SparkFlexConfig();
@@ -40,6 +39,10 @@ public class Elevator extends SubsystemBase {
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .pid(Constants.ElevatorKP, Constants.ElevatorKI, Constants.ElevatorKD)
         .outputRange(-1, 1);
+    rightConfig.closedLoop.maxMotion
+        .maxVelocity(Constants.ElevatorMotionMaxVelocity)
+        .maxAcceleration(Constants.ElevatorMotionMaxAcceleration)
+        .allowedClosedLoopError(Constants.ElevatorMotionAllowedError);
     rightConfig.limitSwitch
         .forwardLimitSwitchEnabled(true)
         .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyClosed)
@@ -52,7 +55,7 @@ public class Elevator extends SubsystemBase {
     if (AtBottom()) {
       zeroEncoder();
     }
-    GoToPosition(getHeight());
+    //GoToPosition(getHeight());
   }
 
   @Override

@@ -61,8 +61,8 @@ public class RobotContainer {
     Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
 
     // Coral
-    //Gamepad.povUp().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
-    //Gamepad.povDown().whileTrue(new ScoreCoral(CoralIntake));
+    Gamepad.leftBumper().whileTrue(new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)));
+    Gamepad.rightBumper().whileTrue(new ScoreCoral(CoralIntake));
     /*Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
       new PickUpCoral(CoralIntake),
       Drivetrain.TurnOnBackCameraCommand()));

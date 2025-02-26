@@ -24,10 +24,12 @@ public class Constants {
 
     // Conversion factors
     public static final double DriveMotorVelocityFactor = 8.6895843e-4;
-    public static final double SteerMotorPositionFactor = 2 * Math.PI;
-    public static final double ClimberPositionConversionFactor = 1.0/125.0;
-    public static final double WristPositionConversionFactor = 1.66666666666;
-    public static final double ElevatorPositionConversionFactor = 0.55889435962;
+    public static final double SteerMotorPositionFactor = 2 * Math.PI; // radians
+    public static final double ClimberPositionConversionFactor = 1.0/125.0; // revolutions of pulley
+    public static final double WristPositionConversionFactor = 5.0/3.0; // degrees
+    public static final double WristVelocityConversionFactor = WristPositionConversionFactor/60; // degrees per sec
+    public static final double ElevatorPositionConversionFactor = 0.55889435962; // cm
+    public static final double ElevatorVelocityConversionFactor = ElevatorPositionConversionFactor/60; // cm per sec
 
     // swerves limits
     public static final double kMinSpeedMetersPerSecond = 0.1;
@@ -81,6 +83,9 @@ public class Constants {
     public static final double ElevatorKS = 0;
     public static final double ElevatorKG = 0;
     public static final double ElevatorKV = 0;
+    public static final double ElevatorMotionMaxVelocity = 55; // cm per second
+    public static final double ElevatorMotionMaxAcceleration = 55; // cm per second^2
+    public static final double ElevatorMotionAllowedError = 1; // cm
 
     // Wrist PID
     public static final double WristKP = 0.75;
@@ -90,7 +95,7 @@ public class Constants {
     public static final double WristKG = 0;
     public static final double WristKV = 0;
     public static final double WristMotionMaxVelocity = 60; // degrees per second
-    public static final double WristMotionMaxAcceleration = 1; // degrees per second^2
+    public static final double WristMotionMaxAcceleration = 60; // degrees per second^2
     public static final double WristMotionAllowedError = 1; // degrees
 
     // Motor Speeds
