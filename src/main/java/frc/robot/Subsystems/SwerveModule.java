@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -56,7 +57,9 @@ public class SwerveModule {
         SteerMotor.configure(SteerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         DriveConfig = new SparkFlexConfig();
-        DriveConfig.inverted(true);
+        DriveConfig
+            .inverted(true)
+            .idleMode(IdleMode.kBrake);
         DriveConfig.encoder.velocityConversionFactor(Constants.DriveMotorVelocityFactor);
         DriveConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
