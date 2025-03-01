@@ -301,7 +301,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command ZeroHeadingCommand(){
-    return run(() -> {zeroHeading();});
+    return runOnce(() -> {zeroHeading();});
   }
   
   public double getHeading() {
