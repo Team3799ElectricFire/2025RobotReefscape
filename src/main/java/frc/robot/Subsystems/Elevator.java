@@ -12,10 +12,13 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -23,18 +26,31 @@ import frc.robot.Constants;
 public class Elevator extends SubsystemBase {
   private SparkFlex LeftMotor = new SparkFlex(Constants.ElevatorLeftMotorID, MotorType.kBrushless);
   private SparkFlex RightMotor = new SparkFlex(Constants.ElevatorRightMotorID, MotorType.kBrushless);
-  private ElevatorFeedforward FeedForward = new ElevatorFeedforward(Constants.ElevatorKS, Constants.ElevatorKG, Constants.ElevatorKV);
+  private ElevatorFeedforward FeedForward = new ElevatorFeedforward(Constants.ElevatorKS, Constants.ElevatorKG,
+      Constants.ElevatorKV);
   private SparkClosedLoopController PIDController;
   private double SoftMax = Constants.ElevatorSoftLimMax;
+  private TrapezoidProfile profile = new TrapezoidProfile(
+      new TrapezoidProfile.Constraints(Constants.ElevatorMotionMaxVelocity, Constants.ElevatorMotionMaxAcceleration));
+  private TrapezoidProfile.State goal = new TrapezoidProfile.State();
+  private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
 
   /** Creates a new Elevator. */
   public Elevator() {
     SparkFlexConfig leftConfig = new SparkFlexConfig();
     leftConfig.follow(Constants.ElevatorRightMotorID, true);
+    leftConfig.encoder
+        .positionConversionFactor(Constants.ElevatorPositionConversionFactor)
+        .velocityConversionFactor(Constants.ElevatorVelocityConversionFactor);
+    leftConfig.idleMode(IdleMode.kCoast);
     LeftMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkFlexConfig rightConfig = new SparkFlexConfig();
-    rightConfig.encoder.positionConversionFactor(Constants.ElevatorPositionConversionFactor);
+    rightConfig.inverted(true);
+    rightConfig.idleMode(IdleMode.kCoast);
+    rightConfig.encoder
+        .positionConversionFactor(Constants.ElevatorPositionConversionFactor)
+        .velocityConversionFactor(Constants.ElevatorVelocityConversionFactor);
     rightConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .pid(Constants.ElevatorKP, Constants.ElevatorKI, Constants.ElevatorKD)
@@ -44,10 +60,14 @@ public class Elevator extends SubsystemBase {
         .maxAcceleration(Constants.ElevatorMotionMaxAcceleration)
         .allowedClosedLoopError(Constants.ElevatorMotionAllowedError);
     rightConfig.limitSwitch
-        .forwardLimitSwitchEnabled(true)
-        .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyClosed)
+        .forwardLimitSwitchEnabled(false)
+        .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
         .reverseLimitSwitchEnabled(true)
-        .reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyClosed);
+        .reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen);
+    rightConfig.softLimit
+        .forwardSoftLimitEnabled(true)
+        .forwardSoftLimit(Constants.ElevatorSoftLimMax)
+        .reverseSoftLimitEnabled(false);
     RightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     PIDController = RightMotor.getClosedLoopController();
@@ -55,13 +75,22 @@ public class Elevator extends SubsystemBase {
     if (AtBottom()) {
       zeroEncoder();
     }
-    //GoToPosition(getHeight());
+    // GoToPosition(getHeight());
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-     }
+    SmartDashboard.putBoolean("Elelvator At Bottom", AtBottom());
+    SmartDashboard.putBoolean("Elevator At Top", AtTop());
+    SmartDashboard.putNumber("Elevator Encoder", getHeight());
+    SmartDashboard.putNumber("Elevator Left Height", getLeftHeight());
+
+    // setpoint = profile.calculate(0.02, setpoint, goal);
+
+    // PIDController.setReference(setpoint.position, ControlType.kPosition,
+    // ClosedLoopSlot.kSlot0, FeedForward.calculate(setpoint.velocity));
+  }
 
   public void ElevatorUp() {
     RightMotor.set(Constants.ElevatorSpeed);
@@ -75,37 +104,52 @@ public class Elevator extends SubsystemBase {
     RightMotor.set(0);
   }
 
-  public void SetSoftMax(double newSoftMax){
+  public void SetSoftMax(double newSoftMax) {
     SoftMax = newSoftMax;
   }
-  
+
   public void GoToPosition(double newTargetPosition) {
     newTargetPosition = Math.min(newTargetPosition, SoftMax);
     newTargetPosition = Math.max(newTargetPosition, Constants.ElevatorSoftLimMin);
-    PIDController.setReference(newTargetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0, FeedForward.calculate(0));
+
+    // goal = new TrapezoidProfile.State(newTargetPosition,0);
+    PIDController.setReference(newTargetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0,
+        FeedForward.calculate(0));
   }
 
-  public Command GoToPositionCommand(double newSetPoint){
-    return run(() -> {GoToPosition(newSetPoint);}); 
+  public Command GoToPositionCommand(double newSetPoint) {
+    return run(() -> {
+      GoToPosition(newSetPoint);
+    });
   }
 
-  public void zeroEncoder (){
+  public void zeroEncoder() {
     RightMotor.getEncoder().setPosition(0);
   }
 
-  public double getHeight(){
+  public Command ZeroEncoderCommand() {
+    return runOnce(() -> {
+      zeroEncoder();
+    });
+  }
+
+  public double getHeight() {
     return RightMotor.getEncoder().getPosition();
   }
 
-  public boolean IsLow() {
-    return getHeight() < Constants.ElevatorLevel2 - 5.0; 
+  public double getLeftHeight() {
+    return LeftMotor.getEncoder().getPosition();
   }
 
-  public boolean AtTop(){
+  public boolean IsLow() {
+    return getHeight() < Constants.ElevatorLevel2 - 5.0;
+  }
+
+  public boolean AtTop() {
     return RightMotor.getForwardLimitSwitch().isPressed();
   }
 
-  public boolean AtBottom(){
+  public boolean AtBottom() {
     return RightMotor.getReverseLimitSwitch().isPressed();
   }
 }

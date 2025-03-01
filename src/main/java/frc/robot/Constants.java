@@ -28,17 +28,17 @@ public class Constants {
     public static final double ClimberPositionConversionFactor = 1.0/125.0; // revolutions of pulley
     public static final double WristPositionConversionFactor = 5.0/3.0; // degrees
     public static final double WristVelocityConversionFactor = WristPositionConversionFactor/60; // degrees per sec
-    public static final double ElevatorPositionConversionFactor = 0.55889435962; // cm
+    public static final double ElevatorPositionConversionFactor = 0.55889435962 * 2.0; // cm
     public static final double ElevatorVelocityConversionFactor = ElevatorPositionConversionFactor/60; // cm per sec
 
     // swerves limits
     public static final double kMinSpeedMetersPerSecond = 0.1;
     public static final double kMaxSpeedMetersPerSecond = Units.feetToMeters(19.3);
     public static final double kMaxAngularSpeed = Units.degreesToRadians(360);
-    public static final double kFrontRightChassisAngularOffset = 58.99/360.0;
-    public static final double kFrontLeftChassisAngularOffset = 177.35/360.0;
-    public static final double kBackRightChassisAngularOffset = 130.29/360.0;
-    public static final double kBackLeftChassisAngularOffset = 288.00/360.0;
+    public static final double kFrontRightChassisAngularOffset = 0.1551025; // CAN ID 7
+    public static final double kFrontLeftChassisAngularOffset = 0.2701502; // CAN ID 1
+    public static final double kBackRightChassisAngularOffset = 0.3462989; // CAN ID 5
+    public static final double kBackLeftChassisAngularOffset = 0.9473056;  // CAN ID 3
 
     // CanbusID
     public static final int FrontRightDriveMotorID = 8;
@@ -59,11 +59,6 @@ public class Constants {
     public static final int CoralRightMotorID = 14;
     public static final int AlgaeMotorID = 12;
 
-    // DIO Channels
-    public static final int CoralTopSwitch = 3;
-    public static final int CoralBottomSwitch = 4;
-    public static final int ClimberHomeSwitch = 5;
-
     // Kinematics
     public static final double WheelBase = Units.inchesToMeters(23.75);
     public static final Translation2d FrontRightTranslation = new Translation2d(+WheelBase / 2, -WheelBase / 2);
@@ -77,9 +72,9 @@ public class Constants {
             BackLeftTranslation);
 
     // Elevator PID
-    public static final double ElevatorKP = 0;
+    public static final double ElevatorKP = 0.1;
     public static final double ElevatorKI = 0;
-    public static final double ElevatorKD = 0;
+    public static final double ElevatorKD = 3;
     public static final double ElevatorKS = 0;
     public static final double ElevatorKG = 0;
     public static final double ElevatorKV = 0;
@@ -94,8 +89,8 @@ public class Constants {
     public static final double WristKS = 0;
     public static final double WristKG = 0;
     public static final double WristKV = 0;
-    public static final double WristMotionMaxVelocity = 60; // degrees per second
-    public static final double WristMotionMaxAcceleration = 60; // degrees per second^2
+    public static final double WristMotionMaxVelocity = 90; // degrees per second
+    public static final double WristMotionMaxAcceleration = 90; // degrees per second^2
     public static final double WristMotionAllowedError = 1; // degrees
 
     // Motor Speeds
@@ -103,10 +98,10 @@ public class Constants {
     public static final double HighSpeedMultiple = 1.0;
     public static final double LowSpeedMultiple = 0.50;
     public static final double minThumbstickMagnitude = 0.1;
-    public static final double ElevatorSpeed = 0.5;
+    public static final double ElevatorSpeed = 0.25;
     public static final double AlgaeIntakeSpeed = 0.3;
     public static final double AlgaeOutakeSpeed = 1.0;
-    public static final double AlgaeHold = 0.05;
+    public static final double AlgaeHold = 0.10;
     public static final double CoralIntakeSpeed = 0.15;
     public static final double CoralSecureSpeed = -0.10;
     public static final double CoralOutakeSpeed = 0.2;
@@ -115,26 +110,25 @@ public class Constants {
     public static final double ClimberUpSpeed = 1.0;
     public static final double WristSpeed = 0.6;
 
-
     // Position Set Points
     public static final double ElevatorLevel1 = 0;// centimeters
     public static final double ElevatorLevel2 = 35;// centimeters
     public static final double ElevatorLevel3 = 75;// centimeters
-    public static final double ElevatorLevel4 = 137;// centimeters
+    public static final double ElevatorLevel4 = 135;// centimeters
     public static final double ElevatorSoftLimMax = 137;//cm
     public static final double ElevatorSoftLimCoral = 42;//cm (highest safe height with coral in elevator's way)
     public static final double ElevatorSoftLimMin = 0;//cm 
     public static final double WristStart = 40;// degree
     public static final double WristScore = 25;//degree
     public static final double WristTravel = 25;//degree
-    public static final double WristPickUp = -15;// degree
+    public static final double WristPickUp = -13;// degree
     public static final double WristSoftLimMax = 40;//degree
     public static final double WristSoftLimMin = -15;//degree
 
     // Driving Constants
-    public static final double panRateOfChangeLimit = 8.0; // Translation Drive Demand Rate-of-Change Limit, units/sec
-    public static final double rotRateOfChangeLimit = 8.0; // Rotation Drive Demand Rate-of-Change Limit, units/sec
-    public static final double teleAngleHoldFactor = 0.035; // Teleop heading maintaining P-gain, 1/degrees
+    public static final double panRateOfChangeLimit = 10.0; // Translation Drive Demand Rate-of-Change Limit, units/sec
+    public static final double rotRateOfChangeLimit = 10.0; // Rotation Drive Demand Rate-of-Change Limit, units/sec
+    public static final double teleAngleHoldFactor = 0.1; // Teleop heading maintaining P-gain, 1/degrees
     public static final double teleCameraHoldFactor = 0.010; // Teleop vision targeting P-gain, 1/degrees
 
     // Path Planner

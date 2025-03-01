@@ -18,6 +18,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,23 +30,28 @@ public class Wrist extends SubsystemBase {
   private ArmFeedforward FeedForward = new ArmFeedforward(Constants.WristKS, Constants.WristKG, Constants.WristKV);
   private SparkClosedLoopController PID;
   private SparkLimitSwitch HomeSwitch = RightMotor.getForwardLimitSwitch();
+  private TrapezoidProfile profile = new TrapezoidProfile(
+      new TrapezoidProfile.Constraints(Constants.WristMotionMaxVelocity, Constants.WristMotionMaxAcceleration));
+  private TrapezoidProfile.State goal = new TrapezoidProfile.State();
+  private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
+  private boolean hasBeenHome = false;
 
   /** Creates a new Wrist. */
   public Wrist() {
     SparkMaxConfig leftConfig = new SparkMaxConfig();
-    leftConfig.idleMode(IdleMode.kBrake);
+    leftConfig.idleMode(IdleMode.kCoast);
     leftConfig.follow(Constants.WristRightMotorID, true);
     LeftMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkMaxConfig rightConfig = new SparkMaxConfig();
-    rightConfig.idleMode(IdleMode.kBrake);
+    rightConfig.idleMode(IdleMode.kCoast);
     rightConfig.encoder
         .positionConversionFactor(Constants.WristPositionConversionFactor)
         .velocityConversionFactor(Constants.WristVelocityConversionFactor);
     rightConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .pid(Constants.WristKP, Constants.WristKI, Constants.WristKD)
-        .outputRange(-1, 1);
+        .outputRange(-0.75, 0.75);
     rightConfig.closedLoop.maxMotion
         .maxVelocity(Constants.WristMotionMaxVelocity)
         .maxAcceleration(Constants.WristMotionMaxAcceleration)
@@ -54,9 +60,8 @@ public class Wrist extends SubsystemBase {
         .forwardLimitSwitchEnabled(true)
         .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
         .reverseLimitSwitchEnabled(false);
-        rightConfig.softLimit
-        .forwardSoftLimitEnabled(true)
-        .forwardSoftLimit(Constants.WristSoftLimMax)
+    rightConfig.softLimit
+        .forwardSoftLimitEnabled(false)
         .reverseSoftLimitEnabled(true)
         .reverseSoftLimit(Constants.WristSoftLimMin);
     RightMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -66,7 +71,7 @@ public class Wrist extends SubsystemBase {
     if (AtHome()) {
       HomeEncoder();
     }
-    //SetReference(getAngle());
+    // SetReference(getAngle());
   }
 
   @Override
@@ -74,6 +79,13 @@ public class Wrist extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("WRIST ANGLE", getAngle());
     SmartDashboard.putBoolean("WRIST HOME", AtHome());
+
+    /*if (hasBeenHome) {
+      setpoint = profile.calculate(0.02, setpoint, goal);
+
+      PID.setReference(setpoint.position, ControlType.kPosition, ClosedLoopSlot.kSlot0,
+          FeedForward.calculate(setpoint.position, setpoint.velocity));
+    }*/
   }
 
   public void WristUp() {
@@ -91,7 +103,10 @@ public class Wrist extends SubsystemBase {
   public void SetReference(double newSetPoint) {
     newSetPoint = Math.min(newSetPoint, Constants.WristSoftLimMax);
     newSetPoint = Math.max(newSetPoint, Constants.WristSoftLimMin);
-    PID.setReference(newSetPoint, ControlType.kPosition, ClosedLoopSlot.kSlot0, FeedForward.calculate(newSetPoint, 0));
+
+    //goal = new TrapezoidProfile.State(newSetPoint, 0);
+    PID.setReference(newSetPoint, ControlType.kPosition, ClosedLoopSlot.kSlot0,
+          FeedForward.calculate(newSetPoint, 0.0));
   }
 
   public boolean AtHome() {
@@ -106,6 +121,9 @@ public class Wrist extends SubsystemBase {
 
   public void HomeEncoder() {
     RightMotor.getEncoder().setPosition(Constants.WristStart);
+    /*hasBeenHome = true;
+    goal = new TrapezoidProfile.State(Constants.WristStart, 0.0);
+    setpoint = new TrapezoidProfile.State(Constants.WristStart,0.0);*/
   }
 
   public Command HomeEncoderCommand() {
