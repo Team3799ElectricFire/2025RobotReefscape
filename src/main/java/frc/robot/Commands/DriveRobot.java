@@ -7,6 +7,7 @@ package frc.robot.Commands;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Drivetrain;
@@ -15,12 +16,14 @@ import frc.robot.Subsystems.Drivetrain;
 public class DriveRobot extends Command {
   private final Drivetrain Drivetrain;
   private DoubleSupplier XSupplier, YSupplier, RotSupplier;
-  private SlewRateLimiter XLimiter = new SlewRateLimiter(8.0);
-  private SlewRateLimiter YLimiter = new SlewRateLimiter(8.0);
-  private SlewRateLimiter RotLimiter = new SlewRateLimiter(8.0);
+  private SlewRateLimiter XLimiter = new SlewRateLimiter(Constants.panRateOfChangeLimit);
+  private SlewRateLimiter YLimiter = new SlewRateLimiter(Constants.panRateOfChangeLimit);
+  private SlewRateLimiter RotLimiter = new SlewRateLimiter(Constants.rotRateOfChangeLimit);
+  private Rotation2d rotationTarget = null; // Angle to maintain if driver is not trying to turn
 
   /** Creates a new DriveRobot. */
-  public DriveRobot(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotSupplier) {
+  public DriveRobot(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier,
+      DoubleSupplier rotSupplier) {
     this.Drivetrain = drivetrain;
     this.XSupplier = xSupplier;
     this.YSupplier = ySupplier;
@@ -31,32 +34,70 @@ public class DriveRobot extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double xRawDemand = -1 * XSupplier.getAsDouble(); 
-    double yRawDemand = -1 *YSupplier.getAsDouble();
+    double xRawDemand = -1 * XSupplier.getAsDouble();
+    double yRawDemand = -1 * YSupplier.getAsDouble();
     double rotRawDemand = -1 * RotSupplier.getAsDouble();
 
-    double xDemand = XLimiter.calculate( xRawDemand * Math.abs(xRawDemand));
-    double yDemand = YLimiter.calculate( yRawDemand * Math.abs(yRawDemand));
-    double rotDemand = RotLimiter.calculate( rotRawDemand * Math.abs(rotRawDemand));
+    // magnitude
+    double leftMagnatude = Math.sqrt(xRawDemand * xRawDemand + yRawDemand * yRawDemand);
+    double rightMagnatude = Math.abs(rotRawDemand);
 
-    //magnitude
-     double leftMagnatude = Math.sqrt(xRawDemand*xRawDemand + yRawDemand*yRawDemand);
-     double rightMagnatude = Math.abs(rotRawDemand);
+    boolean isDriving = leftMagnatude > Constants.minThumbstickMagnitude;
+    boolean isTurning = rightMagnatude > Constants.minThumbstickMagnitude;
 
-    // Only command the modules to move if the driver input is far enough from center
-    if (leftMagnatude > Constants.minThumbstickMagnitude || rightMagnatude > Constants.minThumbstickMagnitude) {
+    // If driver is not trying to drive set raw demand to zero
+    if (!isDriving) {
+      xRawDemand = 0;
+      yRawDemand = 0;
+    }
+
+
+    // If driver is not trying to turn, prevent rotation with PID
+    if (isDriving && !isTurning) {
+      // Just stopped turning, rotation target still not set
+      if (rotationTarget == null) {
+        // Set target to most recent heading
+        rotationTarget = Drivetrain.getPose().getRotation();
+      }
+
+      // Calculate error between target and current heading
+      Rotation2d error = rotationTarget.minus(Drivetrain.getPose().getRotation());
+
+      // Pass turning command to modules
+      rotRawDemand = error.getDegrees() * Constants.teleAngleHoldFactor;
+    } else {
+      // Stopped driving OR started turning, stop trying to hold heading
+      rotationTarget = null;
+    }
+
+
+    if (isTurning && !isDriving) {
+      // sligtly reduce sensitivity if turning in place
+      rotRawDemand = rotRawDemand * 0.9;
+    }
+
+
+    double xDemand = XLimiter.calculate(xRawDemand * Math.abs(xRawDemand));
+    double yDemand = YLimiter.calculate(yRawDemand * Math.abs(yRawDemand));
+    double rotDemand = RotLimiter.calculate(rotRawDemand * Math.abs(rotRawDemand));
+
+
+    // Only command the modules to move if the driver input is far enough from
+    // center
+    if (isDriving || isTurning ) {
       // Drive
       if (Drivetrain.getDriveRobotRelative()) {
         Drivetrain.driveRobotRelative(xDemand, yDemand, rotDemand);
-  
+
       } else {
         Drivetrain.driveFieldRelative(xDemand, yDemand, rotDemand);
-  
+
       }
     } else {
       // Stop
@@ -66,7 +107,8 @@ public class DriveRobot extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override
