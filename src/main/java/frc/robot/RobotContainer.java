@@ -21,9 +21,9 @@ import frc.robot.Subsystems.*;
 public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
   private CoralIntake CoralIntake = new CoralIntake();
-  // private Climber Climber = new Climber();
+  private Climber Climber = new Climber();
   private AlgaeIntake Algae = new AlgaeIntake();
-  //private Elevator Elevate = new Elevator();
+  private Elevator Elevate = new Elevator();
   private Wrist Wrost = new Wrist();
   // private Cameras Cams = new Cameras();
   private CommandXboxController Gamepad = new CommandXboxController(0);
@@ -81,21 +81,16 @@ public class RobotContainer {
     Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
         new PickUpCoral(CoralIntake).withTimeout(0.5)
         .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
-    /*Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
+    Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
         new ScoreCoralLow(CoralIntake),
         new ScoreCoral(CoralIntake),
-        Elevate::IsLow));*/
+        Elevate::IsLow));
 
     // Algae
-    Gamepad.povUp().whileTrue(new WristUp(Wrost));
-    Gamepad.povDown().whileTrue(new WristDown(Wrost));
+    SmartDashboard.putData("Wrist UP Command",new WristUp(Wrost));
+    SmartDashboard.putData("Wrist DOWN Command",new WristDown(Wrost));
     SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
     SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
-    // Gamepad.a().onTrue(Wrost.GoToPositionCommand(Constants.WristPickUp));
-    // Gamepad.b().onTrue(Wrost.GoToPositionCommand(Constants.WristTravel));
-    // Gamepad.y().onTrue(Wrost.GoToPositionCommand(Constants.WristStart));
-    // Gamepad.povUp().whileTrue(new PickUpAlgae(Algae));
-    // Gamepad.povDown().whileTrue(new ScoreAlgae(Algae));
     Gamepad.rightBumper().whileTrue(new SequentialCommandGroup(
         Wrost.GoToPositionCommand(Constants.WristPickUp),
         new PickUpAlgae(Algae)));
@@ -106,20 +101,18 @@ public class RobotContainer {
     Gamepad.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
 
     // Climber
-    /*
-     * Gamepad.povDown().whileTrue(new ClimberDown(Climber));
-     * Gamepad.povUp().whileTrue(new ClimberUp(Climber));
-     */
+    Gamepad.povDown().whileTrue(new ClimberDown(Climber));
+    Gamepad.povUp().whileTrue(new ClimberUp(Climber));
 
     // Elevator
-    // Gamepad.povUp().whileTrue(new ElevatorUp(Elevate));
-    // Gamepad.povDown().whileTrue(new ElevatorDown(Elevate));
-    /*SmartDashboard.putData("Home Elevator Command", new ElevatorHome(Elevate));
+    SmartDashboard.putData("Elevator UP Command",new ElevatorUp(Elevate));
+    SmartDashboard.putData("Elevator DOWN Command",new ElevatorDown(Elevate));
+    SmartDashboard.putData("Home Elevator Command", new ElevatorHome(Elevate));
     SmartDashboard.putData("Reset Elevator Encoder", Elevate.ZeroEncoderCommand());
     Gamepad.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
     Gamepad.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
     Gamepad.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
-    Gamepad.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));*/
+    Gamepad.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
 
     Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
   }

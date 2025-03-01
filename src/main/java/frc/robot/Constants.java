@@ -104,16 +104,16 @@ public class Constants {
     public static final double AlgaeHold = 0.10;
     public static final double CoralIntakeSpeed = 0.15;
     public static final double CoralSecureSpeed = -0.10;
-    public static final double CoralOutakeSpeed = 0.2;
-    public static final double CoralShelfSpeed = 0.25;
+    public static final double CoralOutakeSpeed = 0.35;
+    public static final double CoralShelfSpeed = 0.10;
     public static final double ClimberDownSpeed = -1.0;
     public static final double ClimberUpSpeed = 1.0;
     public static final double WristSpeed = 0.6;
 
     // Position Set Points
     public static final double ElevatorLevel1 = 0;// centimeters
-    public static final double ElevatorLevel2 = 35;// centimeters
-    public static final double ElevatorLevel3 = 75;// centimeters
+    public static final double ElevatorLevel2 = 30;// centimeters
+    public static final double ElevatorLevel3 = 69.5;// centimeters
     public static final double ElevatorLevel4 = 135;// centimeters
     public static final double ElevatorSoftLimMax = 137;//cm
     public static final double ElevatorSoftLimCoral = 42;//cm (highest safe height with coral in elevator's way)

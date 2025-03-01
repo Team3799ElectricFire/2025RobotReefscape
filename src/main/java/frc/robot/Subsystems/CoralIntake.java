@@ -31,7 +31,7 @@ public class CoralIntake extends SubsystemBase {
         .forwardLimitSwitchType(Type.kNormallyClosed)
         .reverseLimitSwitchEnabled(false)
         .reverseLimitSwitchType(Type.kNormallyClosed);
-    leftConfig.follow(Constants.CoralRightMotorID,true);
+    leftConfig.follow(Constants.CoralRightMotorID, true);
     LeftMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkFlexConfig rightConfig = new SparkFlexConfig();
@@ -54,25 +54,31 @@ public class CoralIntake extends SubsystemBase {
     RightMotor.set(Constants.CoralIntakeSpeed);
   }
 
-  public void CoralShelf(){
+  public void CoralPeg() {
+    RightMotor.set(Constants.CoralOutakeSpeed);
+  }
+  
+  public void CoralShelf() {
+    LeftMotor.pauseFollowerMode();
     RightMotor.set(Constants.CoralOutakeSpeed);
     LeftMotor.set(Constants.CoralShelfSpeed);
   }
-  
+
   public void CoralBackward() {
     RightMotor.set(Constants.CoralSecureSpeed);
   }
 
   public void CoralStop() {
+    LeftMotor.resumeFollowerMode();
     RightMotor.set(0);
   }
 
-  public boolean HaveCoral(){
+  public boolean HaveCoral() {
     return !BottomSwitch.isPressed();
   }
 
   public boolean IsSafeCoral() {
     return TopSwitch.isPressed();
   }
-  
+
 }

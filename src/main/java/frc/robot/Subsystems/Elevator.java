@@ -38,11 +38,8 @@ public class Elevator extends SubsystemBase {
   /** Creates a new Elevator. */
   public Elevator() {
     SparkFlexConfig leftConfig = new SparkFlexConfig();
-    leftConfig.follow(Constants.ElevatorRightMotorID, true);
-    leftConfig.encoder
-        .positionConversionFactor(Constants.ElevatorPositionConversionFactor)
-        .velocityConversionFactor(Constants.ElevatorVelocityConversionFactor);
     leftConfig.idleMode(IdleMode.kCoast);
+    leftConfig.follow(Constants.ElevatorRightMotorID, true);
     LeftMotor.configure(leftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     SparkFlexConfig rightConfig = new SparkFlexConfig();
@@ -84,7 +81,6 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putBoolean("Elelvator At Bottom", AtBottom());
     SmartDashboard.putBoolean("Elevator At Top", AtTop());
     SmartDashboard.putNumber("Elevator Encoder", getHeight());
-    SmartDashboard.putNumber("Elevator Left Height", getLeftHeight());
 
     // setpoint = profile.calculate(0.02, setpoint, goal);
 
@@ -118,7 +114,7 @@ public class Elevator extends SubsystemBase {
   }
 
   public Command GoToPositionCommand(double newSetPoint) {
-    return run(() -> {
+    return runOnce(() -> {
       GoToPosition(newSetPoint);
     });
   }
@@ -135,10 +131,6 @@ public class Elevator extends SubsystemBase {
 
   public double getHeight() {
     return RightMotor.getEncoder().getPosition();
-  }
-
-  public double getLeftHeight() {
-    return LeftMotor.getEncoder().getPosition();
   }
 
   public boolean IsLow() {
