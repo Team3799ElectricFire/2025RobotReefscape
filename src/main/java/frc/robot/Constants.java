@@ -108,7 +108,7 @@ public class Constants {
     public static final double CoralShelfSpeed = 0.10;
     public static final double ClimberDownSpeed = -1.0;
     public static final double ClimberUpSpeed = 1.0;
-    public static final double WristSpeed = 0.6;
+    public static final double WristSpeed = 0.25;
 
     // Position Set Points
     public static final double ElevatorLevel1 = 0;// centimeters

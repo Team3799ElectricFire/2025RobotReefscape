@@ -115,6 +115,7 @@ public class RobotContainer {
     Gamepad.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
 
     Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
+    Gamepad.back().onTrue(new InstantCommand(() -> {Drivetrain.toggleDriveRobotRelative();}));
   }
 
   public Command getAutonomousCommand() {
