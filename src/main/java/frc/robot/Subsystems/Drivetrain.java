@@ -197,9 +197,8 @@ public class Drivetrain extends SubsystemBase {
   public void driveRobotRelative(ChassisSpeeds speeds) {
     SwerveModuleState[] moduleStates = Constants.kDriveKinematics.toSwerveModuleStates(speeds, RotationCenter);
 
-    // desaturateWheelSpeed() is changing the value of moduleStates, not returning a
-    // new variable
-    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Constants.kMaxSpeedMetersPerSecond * SpeedMultiple);
+    // desaturateWheelSpeed() is changing the value of moduleStates, not returning a new variable
+    SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Constants.kMaxSpeedMetersPerSecond);
 
     FrontRightModule.setDesiredState(moduleStates[0]);
     FrontLeftModule.setDesiredState(moduleStates[1]);
@@ -211,7 +210,6 @@ public class Drivetrain extends SubsystemBase {
       var result = EstimatedPose.get();
       addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds, null);
     }*/
-    
   }
 
   public void driveRobotRelative(double xSpeed, double ySpeed, double rot) {

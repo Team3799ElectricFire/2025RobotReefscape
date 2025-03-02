@@ -23,7 +23,8 @@ public class Constants {
     public static final double DrivingFFgain = 1.0/565.0;
 
     // Conversion factors
-    public static final double DriveMotorVelocityFactor = 8.6895843e-4;
+    public static final double DriveMotorPositionFactor = 0.0521375063; // meters
+    public static final double DriveMotorVelocityFactor = DriveMotorPositionFactor/60.0; // meters per sec
     public static final double SteerMotorPositionFactor = 2 * Math.PI; // radians
     public static final double ClimberPositionConversionFactor = 1.0/125.0; // revolutions of pulley
     public static final double WristPositionConversionFactor = 5.0/3.0; // degrees
@@ -119,11 +120,12 @@ public class Constants {
     public static final double ElevatorSoftLimCoral = 42;//cm (highest safe height with coral in elevator's way)
     public static final double ElevatorSoftLimMin = 0;//cm 
     public static final double WristStart = 40;// degree
-    public static final double WristScore = 25;//degree
-    public static final double WristTravel = 25;//degree
-    public static final double WristPickUp = -13;// degree
+    public static final double WristScore = 21;//degree
+    public static final double WristTravel = 21;//degree
+    public static final double WristFloorPickUp = -15;// degree
+    public static final double WristReefPickUp = 20;//degree
     public static final double WristSoftLimMax = 40;//degree
-    public static final double WristSoftLimMin = -15;//degree
+    public static final double WristSoftLimMin = -17;//degree
 
     // Driving Constants
     public static final double panRateOfChangeLimit = 10.0; // Translation Drive Demand Rate-of-Change Limit, units/sec
@@ -138,7 +140,7 @@ public class Constants {
             Units.inchesToMeters(2),
             kMaxSpeedMetersPerSecond,
             1.0, 
-            DCMotor.getNeoVortex(1),
+            DCMotor.getNeoVortex(1).withReduction(6.12),
             50,
             1);
     public static final RobotConfig ROBOTCONFIG = new RobotConfig(
@@ -147,13 +149,13 @@ public class Constants {
             SwerveConfig,
             FrontRightTranslation, FrontLeftTranslation, BackRightTranslation, BackLeftTranslation);
     public static final PIDConstants TranslationPIDconstants = new PIDConstants(
-            5.0,
-            0.0,
+            25,
+            0.75,
             0.0); // TODO tune this PID
     public static final PIDConstants RotationPIDconstants = new PIDConstants(
-            5.0,
-            0.0,
-            0.0);  // TODO tune this PID
+            13.0,
+            0.20,
+            0.0); // TODO tune this PID
 
 
    // Cameras

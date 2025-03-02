@@ -58,9 +58,11 @@ public class SwerveModule {
 
         DriveConfig = new SparkFlexConfig();
         DriveConfig
-            .inverted(true)
-            .idleMode(IdleMode.kBrake);
-        DriveConfig.encoder.velocityConversionFactor(Constants.DriveMotorVelocityFactor);
+                .inverted(true)
+                .idleMode(IdleMode.kBrake);
+        DriveConfig.encoder
+                .positionConversionFactor(Constants.DriveMotorPositionFactor)
+                .velocityConversionFactor(Constants.DriveMotorVelocityFactor);
         DriveConfig.closedLoop
                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                 .p(Constants.DrivingPgain)
@@ -87,8 +89,9 @@ public class SwerveModule {
                 new Rotation2d(SteerEncoder.getPosition()));
     }
 
-    public void setDesiredState(SwerveModuleState desiredState) {       
-        // Optimize desired state based on current angle (never rotate module more than 90degrees)
+    public void setDesiredState(SwerveModuleState desiredState) {
+        // Optimize desired state based on current angle (never rotate module more than
+        // 90degrees)
         desiredState.optimize(new Rotation2d(SteerEncoder.getPosition()));
 
         // Always set the driving motor's speed
@@ -103,8 +106,9 @@ public class SwerveModule {
         this.DesiredState = desiredState;
     }
 
-    public void setDesiredStateNoRestrictions(SwerveModuleState desiredState) {   
-        // Optimize desired state based on current angle (never rotate module more than 90degrees)
+    public void setDesiredStateNoRestrictions(SwerveModuleState desiredState) {
+        // Optimize desired state based on current angle (never rotate module more than
+        // 90degrees)
         desiredState.optimize(new Rotation2d(SteerEncoder.getPosition()));
 
         // Always set the driving motor's speed

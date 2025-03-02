@@ -26,7 +26,7 @@ public class RobotContainer {
   private AlgaeIntake Algae = new AlgaeIntake();
   private Elevator Elevate = new Elevator();
   private Wrist Wrost = new Wrist();
-  
+
   private CommandXboxController Gamepad = new CommandXboxController(0);
   private final SendableChooser<Command> autoChooser;
 
@@ -36,75 +36,78 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
     // named comands for pathplanner
-    /*
-     * NamedCommands.registerCommand("CoralFromStation", new
-     * PickUpCoral(CoralIntake));
-     * NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(CoralIntake));
-     * NamedCommands.registerCommand("ScoreCoralLow", new
-     * ScoreCoralLow(CoralIntake));
-     * NamedCommands.registerCommand("PickUpAlgae",new PickUpAlgae(Algae));
-     * NamedCommands.registerCommand("ScoreAlgae",new ScoreAlgae(Algae));
-     * NamedCommands.registerCommand("ElevatorLevel1",
-     * Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
-     * NamedCommands.registerCommand("ElevatorLevel2",
-     * Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
-     * NamedCommands.registerCommand("ElevatorLevel3",
-     * Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
-     * NamedCommands.registerCommand("ElevatorLevel4",
-     * Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
-     * NamedCommands.registerCommand("WristPickup",
-     * Wrost.GoToPositionCommand(Constants.WristPickUp));
-     * NamedCommands.registerCommand("WristHome",Wrost.GoToPositionCommand(Constants
-     * .WristStart));
-     * NamedCommands.registerCommand("WristTravel",
-     * Wrost.GoToPositionCommand(Constants.WristTravel));
-     * NamedCommands.registerCommand("WristScore",
-     * Wrost.GoToPositionCommand(Constants.WristScore));
-     */
+    NamedCommands.registerCommand("CoralFromStation", new PickUpCoral(CoralIntake));
+    NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(CoralIntake));
+    NamedCommands.registerCommand("ScoreCoralLow", new ScoreCoralLow(CoralIntake));
+    NamedCommands.registerCommand("PickUpAlgae", new PickUpAlgae(Algae));
+    NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(Algae));
+    NamedCommands.registerCommand("ElevatorLevel1", Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
+    NamedCommands.registerCommand("ElevatorLevel2", Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
+    NamedCommands.registerCommand("ElevatorLevel3", Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
+    NamedCommands.registerCommand("ElevatorLevel4", Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+    NamedCommands.registerCommand("WristFloorPickup", Wrost.GoToPositionCommand(Constants.WristFloorPickUp));
+    NamedCommands.registerCommand("WristReefPickup", Wrost.GoToPositionCommand(Constants.WristReefPickUp));
+    NamedCommands.registerCommand("WristHome", Wrost.GoToPositionCommand(Constants.WristStart));
+    NamedCommands.registerCommand("WristTravel", Wrost.GoToPositionCommand(Constants.WristTravel));
+    NamedCommands.registerCommand("WristScore", Wrost.GoToPositionCommand(Constants.WristScore));
 
     configureBindings();
   }
 
   public void setAlliance(Alliance color) {
     Cams.setAlliance(color);
-    //Cams.setLowDriverMode(false);
-    //Cams.setHighBDriverMode(false);
-    //Cams.setHighFDriverMode(false);
+    // Cams.setLowDriverMode(false);
+    // Cams.setHighBDriverMode(false);
+    // Cams.setHighFDriverMode(false);
   }
 
   private void configureBindings() {
     // Drivetrain
-    Drivetrain.setDefaultCommand(new DriveRobotWithCamera(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
+    Drivetrain.setDefaultCommand(
+        new DriveRobotWithCamera(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
     Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
-    Gamepad.back().onTrue(new InstantCommand(() -> {Drivetrain.toggleDriveRobotRelative();}));
+    Gamepad.back().onTrue(new InstantCommand(() -> {
+      Drivetrain.toggleDriveRobotRelative();
+    }));
 
     // Coral
     Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
-        new InstantCommand(() -> {Drivetrain.IsAimingBackCamera = true;}),
+        new InstantCommand(() -> {
+          Drivetrain.IsAimingBackCamera = true;
+        }),
         new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
-    /*Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
-        Drivetrain.TurnOnBackCameraCommand(),
-        new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));*/
+    /*
+     * Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
+     * Drivetrain.TurnOnBackCameraCommand(),
+     * new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
+     */
     Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
-        new InstantCommand(() -> {Drivetrain.IsAimingBackCamera = false;}),
+        new InstantCommand(() -> {
+          Drivetrain.IsAimingBackCamera = false;
+        }),
         new PickUpCoral(CoralIntake).withTimeout(0.5)
-        .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
-    /*Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
-        Drivetrain.TurnOffBackCameraCommand(),
-        new PickUpCoral(CoralIntake).withTimeout(0.5)
-        .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));*/
+            .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
+    /*
+     * Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
+     * Drivetrain.TurnOffBackCameraCommand(),
+     * new PickUpCoral(CoralIntake).withTimeout(0.5)
+     * .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
+     */
     Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
         new ScoreCoralLow(CoralIntake),
         new ScoreCoral(CoralIntake),
         Elevate::IsLow));
 
     // Algae
-    SmartDashboard.putData("Wrist UP Command",new WristUp(Wrost));
-    SmartDashboard.putData("Wrist DOWN Command",new WristDown(Wrost));
+    SmartDashboard.putData("Wrist UP Command", new WristUp(Wrost));
+    SmartDashboard.putData("Wrist DOWN Command", new WristDown(Wrost));
     SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
     SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
     Gamepad.rightBumper().whileTrue(new SequentialCommandGroup(
-        Wrost.GoToPositionCommand(Constants.WristPickUp),
+        new ConditionalCommand(
+            Wrost.GoToPositionCommand(Constants.WristFloorPickUp),
+            Wrost.GoToPositionCommand(Constants.WristReefPickUp),
+            Elevate::IsLow),
         new PickUpAlgae(Algae)));
     Gamepad.rightBumper().onFalse(Wrost.GoToPositionCommand(Constants.WristTravel));
     Gamepad.rightTrigger().whileTrue(new SequentialCommandGroup(
@@ -117,8 +120,8 @@ public class RobotContainer {
     Gamepad.povUp().whileTrue(new ClimberUp(Climber));
 
     // Elevator
-    SmartDashboard.putData("Elevator UP Command",new ElevatorUp(Elevate));
-    SmartDashboard.putData("Elevator DOWN Command",new ElevatorDown(Elevate));
+    SmartDashboard.putData("Elevator UP Command", new ElevatorUp(Elevate));
+    SmartDashboard.putData("Elevator DOWN Command", new ElevatorDown(Elevate));
     SmartDashboard.putData("Home Elevator Command", new ElevatorHome(Elevate));
     SmartDashboard.putData("Reset Elevator Encoder", Elevate.ZeroEncoderCommand());
     Gamepad.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
