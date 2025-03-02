@@ -129,7 +129,7 @@ public class Constants {
     public static final double panRateOfChangeLimit = 10.0; // Translation Drive Demand Rate-of-Change Limit, units/sec
     public static final double rotRateOfChangeLimit = 10.0; // Rotation Drive Demand Rate-of-Change Limit, units/sec
     public static final double teleAngleHoldFactor = 0.1; // Teleop heading maintaining P-gain, 1/degrees
-    public static final double teleCameraHoldFactor = 0.010; // Teleop vision targeting P-gain, 1/degrees
+    public static final double teleCameraHoldFactor = 0.10; // Teleop vision targeting P-gain, 1/degrees
 
     // Path Planner
     public static final double MassKG = 30;

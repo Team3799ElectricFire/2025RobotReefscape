@@ -61,6 +61,10 @@ public class Drivetrain extends SubsystemBase {
   }, new Pose2d());
 
   public Cameras eyeballCameras = new Cameras();
+  public boolean IsAimingBackCamera = false;
+  public boolean IsAimingLowCamera = false;
+  public boolean IsAimingHighCamera = false;
+
   private boolean _DriveRobotRelative = true;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
@@ -117,6 +121,9 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("FR HEADING", FrontRightModule.getState().angle.getDegrees());
     SmartDashboard.putNumber("BL HEADING", BackLeftModule.getState().angle.getDegrees());
     SmartDashboard.putNumber("BR HEADING", BackRightModule.getState().angle.getDegrees());
+    SmartDashboard.putBoolean("Back Camera On", IsAimingBackCamera);
+    SmartDashboard.putBoolean("High Camera On", IsAimingHighCamera);
+    SmartDashboard.putBoolean("Low Camera On", IsAimingLowCamera);
   }
 
   public Pose2d getPose() {
@@ -142,27 +149,45 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command TurnOnBackCameraCommand(){
-    return runOnce(() -> {eyeballCameras.setHighBDriverMode(false);});
+    return runOnce(() -> {
+      //eyeballCameras.setHighBDriverMode(false);
+      IsAimingBackCamera = true;
+    });
   }
 
   public Command TurnOffBackCameraCommand(){
-    return runOnce(() -> {eyeballCameras.setHighBDriverMode(true);});
+    return runOnce(() -> {
+      //eyeballCameras.setHighBDriverMode(true);
+      IsAimingBackCamera = false;
+    });
   }
 
   public Command TurnOnHighFCameraCommand(){
-    return runOnce(() -> {eyeballCameras.setHighFDriverMode(false);});
+    return runOnce(() -> {
+      //eyeballCameras.setHighFDriverMode(false);
+      IsAimingHighCamera = true;
+    });
   }
 
   public Command TurnOffHighFCameraCommand(){
-    return runOnce(() -> {eyeballCameras.setHighFDriverMode(true);});
+    return runOnce(() -> {
+      //eyeballCameras.setHighFDriverMode(true);
+      IsAimingHighCamera = false;
+    });
   }
 
   public Command TurnOnLowCameraCommand(){
-    return runOnce(() -> {eyeballCameras.setLowDriverMode(false);});
+    return runOnce(() -> {
+      //eyeballCameras.setLowDriverMode(false);
+      IsAimingLowCamera = true;
+    });
   }
 
   public Command TurnOffLowCameraCommand(){
-    return runOnce(() -> {eyeballCameras.setLowDriverMode(true);});
+    return runOnce(() -> {
+      //eyeballCameras.setLowDriverMode(true);
+      IsAimingLowCamera = false;
+    });
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {

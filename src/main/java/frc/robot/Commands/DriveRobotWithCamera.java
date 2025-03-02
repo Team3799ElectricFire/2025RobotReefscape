@@ -52,8 +52,11 @@ public class DriveRobotWithCamera extends Command {
     double rightMagnatude = Math.abs(rotRawDemand);
 
     // Check if using camera or driver is trying to move
-    // TODO track which tag we're looking for based on what camera is active
-    boolean isAiming =  false; //targetID != AprilTagIDs.NoTarget;
+    boolean isAimingBackCamera = this.Drivetrain.IsAimingBackCamera;
+    boolean isAimingLowCamera = this.Drivetrain.IsAimingLowCamera;
+    boolean IsAimingHighCamera =  this.Drivetrain.IsAimingHighCamera;
+
+    boolean isAiming = isAimingBackCamera || isAimingLowCamera || IsAimingHighCamera;
     boolean isDriving = leftMagnatude > Constants.minThumbstickMagnitude;
     boolean isTurning = rightMagnatude > Constants.minThumbstickMagnitude;
     
@@ -85,10 +88,32 @@ public class DriveRobotWithCamera extends Command {
 
 
     // If back camera is on, look for coral station AprilTags
-    if (isAiming) {
+    if (isAimingBackCamera) {
       // Get angle to apriltag camera sees
       Optional<Double> angle = Cams.getAngleToCoralStation();
       
+      if (angle.isPresent()) {
+        // Overwrite driver turning command if camera found apriltag
+        rotRawDemand = -1 * Constants.teleCameraHoldFactor * angle.get();
+      }
+    }
+
+    // If high camera is on, look for processor AplriTags
+    if (IsAimingHighCamera) {
+      // Get angle to apriltag camera sees
+      Optional<Double> angle = Cams.getAngleToProcessor();
+
+      if (angle.isPresent()) {
+        // Overwrite driver turning command if camera found apriltag
+        rotRawDemand = -1 * Constants.teleCameraHoldFactor * angle.get();
+      }
+    }
+
+    // If low camera is on, look for reef AprilTags
+    if (isAimingLowCamera) {
+      // Get angle to apriltag camera sees
+      Optional<Double> angle = Cams.getAngleToReef();
+
       if (angle.isPresent()) {
         // Overwrite driver turning command if camera found apriltag
         rotRawDemand = -1 * Constants.teleCameraHoldFactor * angle.get();

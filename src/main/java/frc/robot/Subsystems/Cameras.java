@@ -32,8 +32,7 @@ public class Cameras {
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighBackCam);
 
   /** Creates a new Cameras. */
-  public Cameras() {
-  }
+  public Cameras() {}
 
   public void setLowDriverMode(boolean newMode) {
     LowCamera.setDriverMode(newMode);
@@ -64,42 +63,42 @@ public class Cameras {
   }
 
   public Optional<EstimatedRobotPose> getEstimatedPoseLowCamera() {
-    var results = LowCamera.getAllUnreadResults();
-    if (!results.isEmpty()) {
+    var frames = LowCamera.getAllUnreadResults();
+    if (!frames.isEmpty()) {
       // Camera processed a new frame since last
       // Get the last one in the list.
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
+      var latestFrame = frames.get(frames.size() - 1);
+      if (latestFrame.hasTargets()) {
         // At least one AprilTag was seen by the camera
-        return LowCameraPoseEstimator.update(result);
+        return LowCameraPoseEstimator.update(latestFrame);
       }
     }
     return Optional.empty();
   }
 
   public Optional<EstimatedRobotPose> getEstimatedPoseHighFrontCamera() {
-    var results = HighFcamera.getAllUnreadResults();
-    if (!results.isEmpty()) {
+    var frames = HighFcamera.getAllUnreadResults();
+    if (!frames.isEmpty()) {
       // Camera processed a new frame since last
       // Get the last one in the list.
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
+      var latestFrame = frames.get(frames.size() - 1);
+      if (latestFrame.hasTargets()) {
         // At least one AprilTag was seen by the camera
-        return HighFrontCameraPoseEstimator.update(result);
+        return HighFrontCameraPoseEstimator.update(latestFrame);
       }
     }
     return Optional.empty();
   }
 
   public Optional<EstimatedRobotPose> getEstimatedPoseHighBackCamera() {
-    var results = HighBcamera.getAllUnreadResults();
-    if (!results.isEmpty()) {
+    var frames = HighBcamera.getAllUnreadResults();
+    if (!frames.isEmpty()) {
       // Camera processed a new frame since last
       // Get the last one in the list.
-      var result = results.get(results.size() - 1);
-      if (result.hasTargets()) {
+      var latestFrame = frames.get(frames.size() - 1);
+      if (latestFrame.hasTargets()) {
         // At least one AprilTag was seen by the camera
-        return HighBackCameraPoseEstimator.update(result);
+        return HighBackCameraPoseEstimator.update(latestFrame);
       }
     }
     return Optional.empty();
@@ -130,7 +129,7 @@ public class Cameras {
       }
     }
     if (target != null) {
-      return Optional.of(target.getYaw());
+      return Optional.of(target.getSkew());
     } else {
       return Optional.empty();
     }
@@ -163,7 +162,7 @@ public class Cameras {
     }
 
     if (target != null) {
-      return Optional.of(target.getYaw());
+      return Optional.of(target.getSkew());
     } else {
       return Optional.empty();
     }
@@ -196,7 +195,7 @@ public class Cameras {
     }
 
     if (target != null) {
-      return Optional.of(target.getYaw());
+      return Optional.of(target.getSkew());
     } else {
       return Optional.empty();
     }

@@ -20,12 +20,13 @@ import frc.robot.Subsystems.*;
 
 public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
+  private Cameras Cams = Drivetrain.eyeballCameras;
   private CoralIntake CoralIntake = new CoralIntake();
   private Climber Climber = new Climber();
   private AlgaeIntake Algae = new AlgaeIntake();
   private Elevator Elevate = new Elevator();
   private Wrist Wrost = new Wrist();
-  // private Cameras Cams = new Cameras();
+  
   private CommandXboxController Gamepad = new CommandXboxController(0);
   private final SendableChooser<Command> autoChooser;
 
@@ -65,22 +66,33 @@ public class RobotContainer {
   }
 
   public void setAlliance(Alliance color) {
-    // Cams.setAlliance(color);
+    Cams.setAlliance(color);
+    //Cams.setLowDriverMode(false);
+    //Cams.setHighBDriverMode(false);
+    //Cams.setHighFDriverMode(false);
   }
 
   private void configureBindings() {
     // Drivetrain
-    Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
+    Drivetrain.setDefaultCommand(new DriveRobotWithCamera(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
+    Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
+    Gamepad.back().onTrue(new InstantCommand(() -> {Drivetrain.toggleDriveRobotRelative();}));
 
     // Coral
-    // Gamepad.leftBumper().whileTrue(new PickUpCoral(CoralIntake).andThen(new
-    // SecureCoral(CoralIntake)));
-    // Gamepad.rightBumper().whileTrue(new ScoreCoral(CoralIntake));
     Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
+        new InstantCommand(() -> {Drivetrain.IsAimingBackCamera = true;}),
         new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
+    /*Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
+        Drivetrain.TurnOnBackCameraCommand(),
+        new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));*/
     Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
+        new InstantCommand(() -> {Drivetrain.IsAimingBackCamera = false;}),
         new PickUpCoral(CoralIntake).withTimeout(0.5)
         .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
+    /*Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
+        Drivetrain.TurnOffBackCameraCommand(),
+        new PickUpCoral(CoralIntake).withTimeout(0.5)
+        .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));*/
     Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
         new ScoreCoralLow(CoralIntake),
         new ScoreCoral(CoralIntake),
@@ -113,9 +125,6 @@ public class RobotContainer {
     Gamepad.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
     Gamepad.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
     Gamepad.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
-
-    Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
-    Gamepad.back().onTrue(new InstantCommand(() -> {Drivetrain.toggleDriveRobotRelative();}));
   }
 
   public Command getAutonomousCommand() {
