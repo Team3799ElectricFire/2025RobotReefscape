@@ -10,6 +10,8 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -23,9 +25,10 @@ public class Climber extends SubsystemBase {
   public Climber() {
     SparkFlexConfig rightConfig = new SparkFlexConfig();
     rightConfig.encoder.positionConversionFactor(Constants.ClimberPositionConversionFactor);
+    rightConfig.idleMode(IdleMode.kBrake);
     rightConfig.limitSwitch
-        .forwardLimitSwitchEnabled(true)
-        .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyClosed);
+        .forwardLimitSwitchEnabled(false)
+        .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen);
     ClimbMotor.configure(rightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
