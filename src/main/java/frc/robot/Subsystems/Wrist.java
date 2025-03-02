@@ -18,7 +18,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+//import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,11 +30,11 @@ public class Wrist extends SubsystemBase {
   private ArmFeedforward FeedForward = new ArmFeedforward(Constants.WristKS, Constants.WristKG, Constants.WristKV);
   private SparkClosedLoopController PID;
   private SparkLimitSwitch HomeSwitch = RightMotor.getForwardLimitSwitch();
-  private TrapezoidProfile profile = new TrapezoidProfile(
+  /*private TrapezoidProfile profile = new TrapezoidProfile(
       new TrapezoidProfile.Constraints(Constants.WristMotionMaxVelocity, Constants.WristMotionMaxAcceleration));
   private TrapezoidProfile.State goal = new TrapezoidProfile.State();
   private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
-  private boolean hasBeenHome = false;
+  private boolean hasBeenHome = false;*/
 
   /** Creates a new Wrist. */
   public Wrist() {

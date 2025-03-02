@@ -17,7 +17,7 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
+//import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,10 +30,10 @@ public class Elevator extends SubsystemBase {
       Constants.ElevatorKV);
   private SparkClosedLoopController PIDController;
   private double SoftMax = Constants.ElevatorSoftLimMax;
-  private TrapezoidProfile profile = new TrapezoidProfile(
+  /*private TrapezoidProfile profile = new TrapezoidProfile(
       new TrapezoidProfile.Constraints(Constants.ElevatorMotionMaxVelocity, Constants.ElevatorMotionMaxAcceleration));
   private TrapezoidProfile.State goal = new TrapezoidProfile.State();
-  private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
+  private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();*/
 
   /** Creates a new Elevator. */
   public Elevator() {
