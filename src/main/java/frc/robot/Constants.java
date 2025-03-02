@@ -35,10 +35,10 @@ public class Constants {
     public static final double kMinSpeedMetersPerSecond = 0.1;
     public static final double kMaxSpeedMetersPerSecond = Units.feetToMeters(19.3);
     public static final double kMaxAngularSpeed = Units.degreesToRadians(360);
-    public static final double kFrontRightChassisAngularOffset = 0.1551025; // CAN ID 7
-    public static final double kFrontLeftChassisAngularOffset = 0.2701502; // CAN ID 1
-    public static final double kBackRightChassisAngularOffset = 0.3462989; // CAN ID 5
-    public static final double kBackLeftChassisAngularOffset = 0.9473056;  // CAN ID 3
+    public static final double kFrontRightChassisAngularOffset = 0.7922185; // CAN ID 7
+    public static final double kFrontLeftChassisAngularOffset = 0.2272288; // CAN ID 1
+    public static final double kBackRightChassisAngularOffset = 0.3619109; // CAN ID 5
+    public static final double kBackLeftChassisAngularOffset = 0.2692254;  // CAN ID 3
 
     // CanbusID
     public static final int FrontRightDriveMotorID = 8;
