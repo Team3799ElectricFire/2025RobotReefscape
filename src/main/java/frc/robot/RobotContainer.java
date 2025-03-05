@@ -31,16 +31,12 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
   public RobotContainer() {
-    // Build an auto chooser. This will use Commands.none() as the default option.
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-
     // named comands for pathplanner
     NamedCommands.registerCommand("CoralFromStation", new PickUpCoral(CoralIntake));
-    NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(CoralIntake));
-    NamedCommands.registerCommand("ScoreCoralLow", new ScoreCoralLow(CoralIntake));
-    NamedCommands.registerCommand("PickUpAlgae", new PickUpAlgae(Algae));
-    NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(Algae));
+    NamedCommands.registerCommand("ScoreCoral", new ScoreCoral(CoralIntake).withTimeout(0.5));
+    NamedCommands.registerCommand("ScoreCoralLow", new ScoreCoralLow(CoralIntake).withTimeout(1));
+    NamedCommands.registerCommand("PickUpAlgae", new PickUpAlgae(Algae).withTimeout(1));
+    NamedCommands.registerCommand("ScoreAlgae", new ScoreAlgae(Algae).withTimeout(0.5));
     NamedCommands.registerCommand("ElevatorLevel1", Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
     NamedCommands.registerCommand("ElevatorLevel2", Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
     NamedCommands.registerCommand("ElevatorLevel3", Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
@@ -52,6 +48,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("WristScore", Wrost.GoToPositionCommand(Constants.WristScore));
 
     configureBindings();
+    
+    // Build an auto chooser. This will use Commands.none() as the default option.
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   public void setAlliance(Alliance color) {

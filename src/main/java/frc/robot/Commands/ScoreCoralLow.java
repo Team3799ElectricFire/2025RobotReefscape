@@ -21,6 +21,7 @@ public class ScoreCoralLow extends Command {
   @Override
   public void initialize() {
     Intake.CoralShelf();
+    System.out.println("Start of command");
   }
 
   // Called every time the scheduler runs while the command is scheduled.

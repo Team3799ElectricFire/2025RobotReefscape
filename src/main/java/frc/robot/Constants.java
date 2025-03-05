@@ -39,7 +39,7 @@ public class Constants {
     public static final double kFrontRightChassisAngularOffset = 0.7922185; // CAN ID 7
     public static final double kFrontLeftChassisAngularOffset = 0.2272288; // CAN ID 1
     public static final double kBackRightChassisAngularOffset = 0.3619109; // CAN ID 5
-    public static final double kBackLeftChassisAngularOffset = 0.2692254;  // CAN ID 3
+    public static final double kBackLeftChassisAngularOffset = 0.1394443;  // CAN ID 3
 
     // CanbusID
     public static final int FrontRightDriveMotorID = 8;
@@ -151,11 +151,11 @@ public class Constants {
     public static final PIDConstants TranslationPIDconstants = new PIDConstants(
             25,
             0.75,
-            0.0); // TODO tune this PID
+            0.0);
     public static final PIDConstants RotationPIDconstants = new PIDConstants(
             13.0,
             0.20,
-            0.0); // TODO tune this PID
+            0.0);
 
 
    // Cameras
