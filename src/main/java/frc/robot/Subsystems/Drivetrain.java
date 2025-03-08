@@ -65,7 +65,7 @@ public class Drivetrain extends SubsystemBase {
   public boolean IsAimingLowCamera = false;
   public boolean IsAimingHighCamera = false;
 
-  private boolean _DriveRobotRelative = true;
+  private boolean _DriveRobotRelative = false;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
   private final StructArrayPublisher<SwerveModuleState> publisher;
@@ -148,46 +148,51 @@ public class Drivetrain extends SubsystemBase {
     poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
+  public void addVisionMeasurement(Pose2d visionRobotPoseMeters,
+      double timestampSeconds) {
+    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
+  }
+
   public Command TurnOnBackCameraCommand(){
     return runOnce(() -> {
       //eyeballCameras.setHighBDriverMode(false);
       IsAimingBackCamera = true;
-    });
+    }).asProxy();
   }
 
   public Command TurnOffBackCameraCommand(){
     return runOnce(() -> {
       //eyeballCameras.setHighBDriverMode(true);
       IsAimingBackCamera = false;
-    });
+    }).asProxy();
   }
 
   public Command TurnOnHighFCameraCommand(){
     return runOnce(() -> {
       //eyeballCameras.setHighFDriverMode(false);
       IsAimingHighCamera = true;
-    });
+    }).asProxy();
   }
 
   public Command TurnOffHighFCameraCommand(){
     return runOnce(() -> {
       //eyeballCameras.setHighFDriverMode(true);
       IsAimingHighCamera = false;
-    });
+    }).asProxy();
   }
 
   public Command TurnOnLowCameraCommand(){
     return runOnce(() -> {
       //eyeballCameras.setLowDriverMode(false);
       IsAimingLowCamera = true;
-    });
+    }).asProxy();
   }
 
   public Command TurnOffLowCameraCommand(){
     return runOnce(() -> {
       //eyeballCameras.setLowDriverMode(true);
       IsAimingLowCamera = false;
-    });
+    }).asProxy();
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
@@ -205,11 +210,27 @@ public class Drivetrain extends SubsystemBase {
     BackRightModule.setDesiredState(moduleStates[2]);
     BackLeftModule.setDesiredState(moduleStates[3]);
 
-    /*var EstimatedPose = eyeballCameras.getEstimatedPoseLowCamera();
+    UptadePoseWithCameras();
+  }
+
+  private void UptadePoseWithCameras(){
+    var EstimatedPose = eyeballCameras.getEstimatedPoseLowCamera();
     if (EstimatedPose.isPresent()){
       var result = EstimatedPose.get();
-      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds, null);
-    }*/
+      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds);
+    }
+
+    EstimatedPose = eyeballCameras.getEstimatedPoseHighBackCamera();
+    if (EstimatedPose.isPresent()){
+      var result = EstimatedPose.get();
+      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds);
+    }
+
+    EstimatedPose = eyeballCameras.getEstimatedPoseHighFrontCamera();
+    if (EstimatedPose.isPresent()){
+      var result = EstimatedPose.get();
+      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds);
+    }
   }
 
   public void driveRobotRelative(double xSpeed, double ySpeed, double rot) {
@@ -221,26 +242,17 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("Vy", yVelocityMetersPerSecond);
     SmartDashboard.putNumber("rot", rotationRadiansPerSecond);
 
-    ChassisSpeeds speeds = new ChassisSpeeds(xVelocityMetersPerSecond, yVelocityMetersPerSecond,
-        rotationRadiansPerSecond);
+    ChassisSpeeds speeds = new ChassisSpeeds(xVelocityMetersPerSecond, yVelocityMetersPerSecond, rotationRadiansPerSecond);
 
     SwerveModuleState[] moduleStates = Constants.kDriveKinematics.toSwerveModuleStates(speeds, RotationCenter);
 
-    // desaturateWheelSpeed() is changing the value of moduleStates, not returning a
-    // new variable
+    // desaturateWheelSpeed() is changing the value of moduleStates, not returning a new variable
     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Constants.kMaxSpeedMetersPerSecond * SpeedMultiple);
 
     FrontRightModule.setDesiredState(moduleStates[0]);
-    SmartDashboard.putNumber("FR ANGLE SP", moduleStates[0].angle.getDegrees());
-
     FrontLeftModule.setDesiredState(moduleStates[1]);
-    SmartDashboard.putNumber("FL ANGLE SP", moduleStates[1].angle.getDegrees());
-
     BackRightModule.setDesiredState(moduleStates[2]);
-    SmartDashboard.putNumber("BR ANGLE SP", moduleStates[2].angle.getDegrees());
-
     BackLeftModule.setDesiredState(moduleStates[3]);
-    SmartDashboard.putNumber("BL ANGLE SP", moduleStates[3].angle.getDegrees());
   }
 
   public void driveFieldRelative(double xSpeed, double ySpeed, double rot) {
@@ -248,13 +260,11 @@ public class Drivetrain extends SubsystemBase {
     double yVelocityMetersPerSecond = ySpeed * Constants.kMaxSpeedMetersPerSecond;
     double rotationRadiansPerSecond = rot * Constants.kMaxAngularSpeed;
 
-    ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocityMetersPerSecond, yVelocityMetersPerSecond,
-        rotationRadiansPerSecond, Pidgey.getRotation2d());
+    ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(xVelocityMetersPerSecond, yVelocityMetersPerSecond, rotationRadiansPerSecond, Pidgey.getRotation2d());
 
     SwerveModuleState[] moduleStates = Constants.kDriveKinematics.toSwerveModuleStates(speeds, RotationCenter);
 
-    // desaturateWheelSpeed() is changing the value of moduleStates, not returning a
-    // new variable
+    // desaturateWheelSpeed() is changing the value of moduleStates, not returning a new variable
     SwerveDriveKinematics.desaturateWheelSpeeds(moduleStates, Constants.kMaxSpeedMetersPerSecond * SpeedMultiple);
 
     FrontRightModule.setDesiredState(moduleStates[0]);
@@ -324,7 +334,9 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public Command ZeroHeadingCommand(){
-    return runOnce(() -> {zeroHeading();});
+    return runOnce(() -> {
+      zeroHeading();
+    }).asProxy();
   }
   
   public double getHeading() {
@@ -353,6 +365,12 @@ public class Drivetrain extends SubsystemBase {
     this._DriveRobotRelative = !this._DriveRobotRelative;
   }
 
+  public Command toggleDriveRobotRelativeCommand(){ 
+    return runOnce(() -> {
+      toggleDriveRobotRelative();
+    }).asProxy();
+  }
+
   public boolean getDriveRobotRelative() {
     return this._DriveRobotRelative;
   }
@@ -365,8 +383,20 @@ public class Drivetrain extends SubsystemBase {
     SpeedMultiple = Constants.HighSpeedMultiple;
   }
 
+  public Command setHgihSpeedCommand() {
+    return runOnce(() -> {
+      setHighSpeed();
+    }).asProxy();
+  }
+
   public void setLowSpeed() {
     SpeedMultiple = Constants.LowSpeedMultiple;
+  }
+
+  public Command setLowSpeedCommand() {
+    return runOnce(() -> {
+      setLowSpeed();
+    }).asProxy();
   }
 
   public void toggleHiLoSpeed() {
