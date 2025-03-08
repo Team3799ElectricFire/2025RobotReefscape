@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.*;
@@ -27,7 +26,8 @@ public class RobotContainer {
   private Elevator Elevate = new Elevator();
   private Wrist Wrost = new Wrist();
 
-  private CommandXboxController Gamepad = new CommandXboxController(0);
+  private CommandXboxController Driver = new CommandXboxController(0);
+  private CommandXboxController Copilot = new CommandXboxController(1);
   private final SendableChooser<Command> autoChooser;
 
   public RobotContainer() {
@@ -48,7 +48,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("WristScore", Wrost.GoToPositionCommand(Constants.WristScore));
 
     configureBindings();
-    
+
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -56,44 +56,21 @@ public class RobotContainer {
 
   public void setAlliance(Alliance color) {
     Cams.setAlliance(color);
-    // Cams.setLowDriverMode(false);
-    // Cams.setHighBDriverMode(false);
-    // Cams.setHighFDriverMode(false);
   }
 
   private void configureBindings() {
     // Drivetrain
-    Drivetrain.setDefaultCommand(
-        new DriveRobotWithCamera(Drivetrain, Gamepad::getLeftY, Gamepad::getLeftX, Gamepad::getRightX));
-    Gamepad.start().onTrue(Drivetrain.ZeroHeadingCommand());
-    Gamepad.back().onTrue(new InstantCommand(() -> {
-      Drivetrain.toggleDriveRobotRelative();
-    }));
+    Drivetrain.setDefaultCommand(new DriveRobotWithCamera(Drivetrain, Driver::getLeftY, Driver::getLeftX, Driver::getRightX));
+    Driver.start().onTrue(Drivetrain.ZeroHeadingCommand());
+    Driver.back().onTrue(Drivetrain.toggleDriveRobotRelativeCommand());
 
     // Coral
-    Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
-        new InstantCommand(() -> {
-          Drivetrain.IsAimingBackCamera = true;
-        }),
+    Driver.leftBumper().whileTrue(new SequentialCommandGroup(
         new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
-    /*
-     * Gamepad.leftBumper().whileTrue(new SequentialCommandGroup(
-     * Drivetrain.TurnOnBackCameraCommand(),
-     * new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
-     */
-    Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
-        new InstantCommand(() -> {
-          Drivetrain.IsAimingBackCamera = false;
-        }),
+    Driver.leftBumper().onFalse(new SequentialCommandGroup(
         new PickUpCoral(CoralIntake).withTimeout(0.5)
             .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
-    /*
-     * Gamepad.leftBumper().onFalse(new SequentialCommandGroup(
-     * Drivetrain.TurnOffBackCameraCommand(),
-     * new PickUpCoral(CoralIntake).withTimeout(0.5)
-     * .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
-     */
-    Gamepad.leftTrigger().whileTrue(new ConditionalCommand(
+    Driver.leftTrigger().whileTrue(new ConditionalCommand(
         new ScoreCoralLow(CoralIntake),
         new ScoreCoral(CoralIntake),
         Elevate::IsLow));
@@ -103,31 +80,42 @@ public class RobotContainer {
     SmartDashboard.putData("Wrist DOWN Command", new WristDown(Wrost));
     SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
     SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
-    Gamepad.rightBumper().whileTrue(new SequentialCommandGroup(
+    Driver.rightBumper().whileTrue(new SequentialCommandGroup(
         new ConditionalCommand(
             Wrost.GoToPositionCommand(Constants.WristFloorPickUp),
             Wrost.GoToPositionCommand(Constants.WristReefPickUp),
             Elevate::IsLow),
         new PickUpAlgae(Algae)));
-    Gamepad.rightBumper().onFalse(Wrost.GoToPositionCommand(Constants.WristTravel));
-    Gamepad.rightTrigger().whileTrue(new SequentialCommandGroup(
+    Driver.rightBumper().onFalse(new SequentialCommandGroup(
+      Wrost.GoToPositionCommand(Constants.WristTravel)));
+    Driver.rightTrigger().whileTrue(new SequentialCommandGroup(
         Wrost.GoToPositionCommand(Constants.WristScore),
         new ScoreAlgae(Algae)));
-    Gamepad.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
+    Driver.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
 
     // Climber
-    Gamepad.povDown().whileTrue(new ClimberDown(Climber));
-    Gamepad.povUp().whileTrue(new ClimberUp(Climber));
+    Driver.povDown().whileTrue(new ClimberDown(Climber));
+    Driver.povUp().whileTrue(new ClimberUp(Climber));
 
     // Elevator
     SmartDashboard.putData("Elevator UP Command", new ElevatorUp(Elevate));
     SmartDashboard.putData("Elevator DOWN Command", new ElevatorDown(Elevate));
     SmartDashboard.putData("Home Elevator Command", new ElevatorHome(Elevate));
     SmartDashboard.putData("Reset Elevator Encoder", Elevate.ZeroEncoderCommand());
-    Gamepad.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
-    Gamepad.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
-    Gamepad.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
-    Gamepad.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+    Driver.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
+    Driver.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
+    Driver.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
+    Driver.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+
+    // Cameras
+    if (Copilot.isConnected()) {
+      Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand());
+      Copilot.a().onFalse(Drivetrain.TurnOffHighFCameraCommand());
+      Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand());
+      Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
+      Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand());
+      Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
+    }
   }
 
   public Command getAutonomousCommand() {
