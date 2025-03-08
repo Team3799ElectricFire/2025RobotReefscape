@@ -168,9 +168,14 @@ public class Constants {
    public static final int[] RedReef = {6,7,8,9,10,11};
    public static final int[] BlueCoralstation = {12,13};
    public static final int[] RedCoralstation = {1,2};
-   public static final Transform3d robotToLowCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
-   public static final Transform3d robotToHighFrontCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
-   public static final Transform3d robotToHighBackCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0));
-   // TODO confirm camera locations
+   public static final Transform3d robotToLowCam = new Transform3d(
+        new Translation3d(Units.inchesToMeters(5.857), Units.inchesToMeters(8.831), Units.inchesToMeters(11.75)), 
+        new Rotation3d(0,0,Units.degreesToRadians(-26)));
+   public static final Transform3d robotToHighFrontCam = new Transform3d(
+        new Translation3d(Units.inchesToMeters(5.177), Units.inchesToMeters(8.721), Units.inchesToMeters(39.426)), 
+        new Rotation3d(0,Units.degreesToRadians(-40),0));
+   public static final Transform3d robotToHighBackCam = new Transform3d(
+        new Translation3d(Units.inchesToMeters(-0.648), Units.inchesToMeters(9.239), Units.inchesToMeters(38.239)),
+        new Rotation3d(Units.degreesToRadians(180),Units.degreesToRadians(-140),0));
 
 } 
