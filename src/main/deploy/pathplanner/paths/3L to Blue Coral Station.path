@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.972879209696038,
+        "y": 5.244967589520297
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.6281015877468166,
+        "y": 6.062518429752055
+      },
+      "isLocked": false,
+      "linkedName": "Reef 3L"
+    },
+    {
+      "anchor": {
+        "x": 1.135,
+        "y": 6.95
+      },
+      "prevControl": {
+        "x": 2.0809876313571047,
+        "y": 6.391848769795373
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Blue Coral Station"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -54.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -59.99999999999999
+  },
+  "useDefaultConstraints": true
+}
