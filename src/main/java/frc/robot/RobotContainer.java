@@ -64,6 +64,9 @@ public class RobotContainer {
     Driver.start().onTrue(Drivetrain.ZeroHeadingCommand());
     Driver.back().onTrue(Drivetrain.toggleDriveRobotRelativeCommand());
 
+    Driver.leftStick().onTrue(Drivetrain.setLowSpeedCommand());
+    Driver.rightStick().onTrue(Drivetrain.setHgihSpeedCommand());
+
     // Coral
     Driver.leftBumper().whileTrue(new SequentialCommandGroup(
         new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
@@ -106,6 +109,11 @@ public class RobotContainer {
     Driver.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
     Driver.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
     Driver.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+
+    Copilot.povDown().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
+    Copilot.povRight().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
+    Copilot.povLeft().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
+    Copilot.povUp().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
 
     // Cameras
     if (Copilot.isConnected()) {
