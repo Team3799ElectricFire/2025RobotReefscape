@@ -8,6 +8,9 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+
+import java.util.concurrent.locks.Lock;
+
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -17,7 +20,6 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-//import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,10 +32,7 @@ public class Elevator extends SubsystemBase {
       Constants.ElevatorKV);
   private SparkClosedLoopController PIDController;
   private double SoftMax = Constants.ElevatorSoftLimMax;
-  /*private TrapezoidProfile profile = new TrapezoidProfile(
-      new TrapezoidProfile.Constraints(Constants.ElevatorMotionMaxVelocity, Constants.ElevatorMotionMaxAcceleration));
-  private TrapezoidProfile.State goal = new TrapezoidProfile.State();
-  private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();*/
+  private boolean LockElevator = false;
 
   /** Creates a new Elevator. */
   public Elevator() {
@@ -81,11 +80,6 @@ public class Elevator extends SubsystemBase {
     SmartDashboard.putBoolean("Elelvator At Bottom", AtBottom());
     SmartDashboard.putBoolean("Elevator At Top", AtTop());
     SmartDashboard.putNumber("Elevator Encoder", getHeight());
-
-    // setpoint = profile.calculate(0.02, setpoint, goal);
-
-    // PIDController.setReference(setpoint.position, ControlType.kPosition,
-    // ClosedLoopSlot.kSlot0, FeedForward.calculate(setpoint.velocity));
   }
 
   public void ElevatorUp() {
@@ -105,12 +99,13 @@ public class Elevator extends SubsystemBase {
   }
 
   public void GoToPosition(double newTargetPosition) {
-    newTargetPosition = Math.min(newTargetPosition, SoftMax);
-    newTargetPosition = Math.max(newTargetPosition, Constants.ElevatorSoftLimMin);
+    if (!LockElevator) {
+      newTargetPosition = Math.min(newTargetPosition, SoftMax);
+      newTargetPosition = Math.max(newTargetPosition, Constants.ElevatorSoftLimMin);
 
-    // goal = new TrapezoidProfile.State(newTargetPosition,0);
-    PIDController.setReference(newTargetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0,
-        FeedForward.calculate(0));
+      PIDController.setReference(newTargetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0,
+          FeedForward.calculate(0));
+    }
   }
 
   public Command GoToPositionCommand(double newSetPoint) {
@@ -126,6 +121,26 @@ public class Elevator extends SubsystemBase {
   public Command ZeroEncoderCommand() {
     return runOnce(() -> {
       zeroEncoder();
+    });
+  }
+
+  public void LockElevator() {
+    LockElevator = true;
+  }
+
+  public Command LockElevatorCommand() {
+    return runOnce(() -> {
+      LockElevator();
+    });
+  }
+
+  public void UnLockElevator() {
+    LockElevator = false;
+  }
+
+  public Command UnLockElevatorCommand() {
+    return runOnce(() -> {
+      UnLockElevator();
     });
   }
 

@@ -68,12 +68,11 @@ public class RobotContainer {
     Driver.rightStick().onTrue(Drivetrain.setHgihSpeedCommand());
 
     // Coral
-    Driver.leftBumper().whileTrue(new SequentialCommandGroup(
-        new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake))));
-    Driver.leftBumper().onFalse(new SequentialCommandGroup(
-        new PickUpCoral(CoralIntake).withTimeout(0.5)
-            .andThen(new SecureCoral(CoralIntake)).withTimeout(0.5)));
-    Driver.leftTrigger().whileTrue(new ConditionalCommand(
+    Driver.leftBumper().onTrue(new SequentialCommandGroup(
+        Elevate.LockElevatorCommand(),
+        new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)),
+        Elevate.UnLockElevatorCommand()));
+    Driver.leftTrigger().onTrue(new ConditionalCommand(
         new ScoreCoralLow(CoralIntake),
         new ScoreCoral(CoralIntake),
         Elevate::IsLow));
