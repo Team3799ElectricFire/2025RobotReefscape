@@ -57,7 +57,7 @@ public class CoralIntake extends SubsystemBase {
   public void CoralPeg() {
     RightMotor.set(Constants.CoralOutakeSpeed);
   }
-  
+
   public void CoralShelf() {
     LeftMotor.pauseFollowerMode();
     RightMotor.set(Constants.CoralOutakeSpeed);
@@ -80,5 +80,15 @@ public class CoralIntake extends SubsystemBase {
   public boolean IsSafeCoral() {
     return TopSwitch.isPressed();
   }
-
+  // idea for spit coral out the way it came(return to sender) if stuck or smt
+  /*
+   * public void CoralReject() {
+   * RightMotor.set(Constants.CoralReverseSpeed);
+   * 
+   * CoralReverseSpeed being some negative value dat spits it bac out, maybe just
+   * -0.30 like opposite intake speed?
+   * no wait lower cuz dont want cannon fire :P
+   * set dis all to button de copilot
+   * }
+   */
 }
