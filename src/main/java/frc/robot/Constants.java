@@ -189,4 +189,20 @@ public class Constants {
 
   public static final Matrix<N3, N1> kStateStdDevs = VecBuilder.fill(0.1,0.1,0.1);
   public static final Matrix<N3, N1> kVisionStdDevs = VecBuilder.fill(1,1,1);
+
+
+  // Driver Assist
+  public static final double X_REEF_ALIGNMENT_P = 3.3; // TODO tune these
+  public static final double Y_REEF_ALIGNMENT_P = 3.3;
+  public static final double ROT_REEF_ALIGNMENT_P = 0.058;
+
+  public static final double X_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(-17.75);  // Vertical pose [m]
+  public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.02;
+  public static final double Y_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(6.5);  // Horizontal pose [m]
+  public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.02;
+  public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0;  // Rotation [deg]
+  public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 1;
+
+  public static final double POSE_VALIDATION_TIME = 0.3;
+  public static final double DONT_SEE_TAG_WAIT_TIME = 1;
 } 

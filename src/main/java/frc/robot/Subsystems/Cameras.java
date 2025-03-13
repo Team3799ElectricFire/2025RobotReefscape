@@ -358,6 +358,24 @@ public class Cameras {
     }
   }
 
+  public Optional<PhotonTrackedTarget> getLowCameraTag() {
+    Optional<PhotonTrackedTarget> target = Optional.empty();
+    var ourReef = (ourAlliance == Alliance.Red) ? Constants.RedReef : Constants.BlueReef;
+
+    var frames = LowCamera.getAllUnreadResults();
+    if (!frames.isEmpty()) {
+      var latestFrame = frames.get(frames.size() - 1);
+      for (var detection : latestFrame.getTargets()) {
+        if (isMember(ourReef, detection.getFiducialId())) {
+          if (target.isEmpty() || detection.area > target.get().area) {
+            target = Optional.of(detection);
+          }
+        }
+      }
+    }
+    return target;
+  }
+
   public static boolean isMember(int[] array, int element) {
     Arrays.sort(array); // Sort the array first
     return Arrays.binarySearch(array, element) >= 0;
