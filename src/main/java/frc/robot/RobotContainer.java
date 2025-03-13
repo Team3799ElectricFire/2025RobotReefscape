@@ -19,7 +19,7 @@ import frc.robot.Subsystems.*;
 
 public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
-  private Cameras Cams = Drivetrain.eyeballCameras;
+  private Cameras Cams = Drivetrain.Cams;
   private CoralIntake CoralIntake = new CoralIntake();
   private Climber Climber = new Climber();
   private AlgaeIntake Algae = new AlgaeIntake();

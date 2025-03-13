@@ -6,10 +6,15 @@ package frc.robot.Subsystems;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Constants;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
@@ -19,20 +24,34 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 public class Cameras {
-  private PhotonCamera LowCamera = new PhotonCamera(Constants.LowCameraName);
-  private PhotonCamera HighFcamera = new PhotonCamera(Constants.HighFrontCameraName);
-  private PhotonCamera HighBcamera = new PhotonCamera(Constants.HighBackCameraName);
   private Alliance ourAlliance = Alliance.Red;
-  AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-  PhotonPoseEstimator LowCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+  private AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+
+  // Low Front Camera
+  private PhotonCamera LowCamera = new PhotonCamera(Constants.LowCameraName);
+  private PhotonPoseEstimator LowCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToLowCam);
-  PhotonPoseEstimator HighFrontCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+  private Matrix<N3,N1> LowCameraCurStdDevs;
+
+  // High Front Camera
+  private PhotonCamera HighFcamera = new PhotonCamera(Constants.HighFrontCameraName);
+  private PhotonPoseEstimator HighFrontCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighFrontCam);
-  PhotonPoseEstimator HighBackCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
+  private Matrix<N3,N1> HighFrontCameraCurStdDevs;
+
+  // High Back Camera
+  private PhotonCamera HighBcamera = new PhotonCamera(Constants.HighBackCameraName);
+  private PhotonPoseEstimator HighBackCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighBackCam);
+  private Matrix<N3,N1> HighBackCameraCurStdDevs;
 
   /** Creates a new Cameras. */
-  public Cameras() {}
+  public Cameras() {
+    // Fallback Strategy Settings
+    LowCameraPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    HighFrontCameraPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    HighBackCameraPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+  }
 
   public void setLowDriverMode(boolean newMode) {
     LowCamera.setDriverMode(newMode);
@@ -62,47 +81,185 @@ public class Cameras {
     ourAlliance = color;
   }
 
+  // region LowCamera
   public Optional<EstimatedRobotPose> getEstimatedPoseLowCamera() {
-    var frames = LowCamera.getAllUnreadResults();
-    if (!frames.isEmpty()) {
-      // Camera processed a new frame since last
-      // Get the last one in the list.
-      var latestFrame = frames.get(frames.size() - 1);
-      if (latestFrame.hasTargets()) {
-        // At least one AprilTag was seen by the camera
-        return LowCameraPoseEstimator.update(latestFrame);
-      }
+    // Initialize empty Optional variable representing the estimated robot pose
+    Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+    /*
+     * For each frame camera has processed, use this camera's PhotonPoseEstimator
+     * to update estimated robot pose and standard deviation of that estimated pose.
+     * Each camera maintains its' own estimation.
+     */
+    for (var frame : LowCamera.getAllUnreadResults()) {
+      visionEst = LowCameraPoseEstimator.update(frame);
+      updateLowCamStdDevs(visionEst, frame.getTargets());
     }
-    return Optional.empty();
+    return visionEst;
   }
 
+  private void updateLowCamStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
+    if (estimatedPose.isEmpty()) {
+      LowCameraCurStdDevs = Constants.kSingleTagStdDevs;
+    } else {
+      var estStdDevs = Constants.kSingleTagStdDevs;
+      int numTags = 0;
+      double avgDist = 0;
+      for (var tgt : targets) {
+        // Get the pose of the tag seen
+        var tagPose = LowCameraPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+
+        // If tag seen is not part of the field, ignore it and go to the next target
+        if (tagPose.isEmpty()) continue;
+
+        numTags++;
+        avgDist += tagPose.get().toPose2d().getTranslation().getDistance(
+          estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+      }
+
+      if (numTags == 0) {
+        // No tags visible. Default to single-tag std devs
+        LowCameraCurStdDevs = Constants.kSingleTagStdDevs;
+      } else {
+        // One or more tags visible, run the full heuristic.
+        avgDist /= numTags;
+        // Decrease std devs if multiple targets are visible
+        if (numTags > 1)
+          estStdDevs = Constants.kSMultiTagStdDevs;
+        // Increase std devs based on (average) distance
+        if (numTags == 1 && avgDist > 4)
+          estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        else
+          estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+          LowCameraCurStdDevs = estStdDevs;
+      }
+    }
+  }
+
+  public Matrix<N3, N1> getLowCameraEstStdDevs() {
+    return LowCameraCurStdDevs;
+  }
+  // endregion
+
+  // region HighFrontCamera
   public Optional<EstimatedRobotPose> getEstimatedPoseHighFrontCamera() {
-    var frames = HighFcamera.getAllUnreadResults();
-    if (!frames.isEmpty()) {
-      // Camera processed a new frame since last
-      // Get the last one in the list.
-      var latestFrame = frames.get(frames.size() - 1);
-      if (latestFrame.hasTargets()) {
-        // At least one AprilTag was seen by the camera
-        return HighFrontCameraPoseEstimator.update(latestFrame);
-      }
+    // Initialize empty Optional variable representing the estimated robot pose
+    Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+    /*
+     * For each frame camera has processed, use this camera's PhotonPoseEstimator
+     * to update estimated robot pose and standard deviation of that estimated pose.
+     * Each camera maintains its' own estimation.
+     */
+    for (var frame : HighFcamera.getAllUnreadResults()) {
+      visionEst = HighFrontCameraPoseEstimator.update(frame);
+      updateHighFrontCamStdDevs(visionEst, frame.getTargets());
     }
-    return Optional.empty();
+    return visionEst;
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedPoseHighBackCamera() {
-    var frames = HighBcamera.getAllUnreadResults();
-    if (!frames.isEmpty()) {
-      // Camera processed a new frame since last
-      // Get the last one in the list.
-      var latestFrame = frames.get(frames.size() - 1);
-      if (latestFrame.hasTargets()) {
-        // At least one AprilTag was seen by the camera
-        return HighBackCameraPoseEstimator.update(latestFrame);
+  private void updateHighFrontCamStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
+    if (estimatedPose.isEmpty()) {
+      HighFrontCameraCurStdDevs = Constants.kSingleTagStdDevs;
+    } else {
+      var estStdDevs = Constants.kSingleTagStdDevs;
+      int numTags = 0;
+      double avgDist = 0;
+      for (var tgt : targets) {
+        // Get the pose of the tag seen
+        var tagPose = HighFrontCameraPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+
+        // If tag seen is not part of the field, ignore it and go to the next target
+        if (tagPose.isEmpty()) continue;
+
+        numTags++;
+        avgDist += tagPose.get().toPose2d().getTranslation().getDistance(
+          estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+      }
+
+      if (numTags == 0) {
+        // No tags visible. Default to single-tag std devs
+        HighFrontCameraCurStdDevs = Constants.kSingleTagStdDevs;
+      } else {
+        // One or more tags visible, run the full heuristic.
+        avgDist /= numTags;
+        // Decrease std devs if multiple targets are visible
+        if (numTags > 1)
+          estStdDevs = Constants.kSMultiTagStdDevs;
+        // Increase std devs based on (average) distance
+        if (numTags == 1 && avgDist > 4)
+          estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        else
+          estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+          HighFrontCameraCurStdDevs = estStdDevs;
       }
     }
-    return Optional.empty();
   }
+
+  public Matrix<N3, N1> getHighFrontCameraEstStdDevs() {
+    return HighFrontCameraCurStdDevs;
+  }
+  // endregion
+
+  // region HighBackCamera
+  public Optional<EstimatedRobotPose> getEstimatedPoseHighBackCamera() {
+    // Initialize empty Optional variable representing the estimated robot pose
+    Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+    /*
+     * For each frame camera has processed, use this camera's PhotonPoseEstimator
+     * to update estimated robot pose and standard deviation of that estimated pose.
+     * Each camera maintains its' own estimation.
+     */
+    for (var frame : HighBcamera.getAllUnreadResults()) {
+      visionEst = HighBackCameraPoseEstimator.update(frame);
+      updateHighBackCamStdDevs(visionEst, frame.getTargets());
+    }
+    return visionEst;
+  }
+
+  private void updateHighBackCamStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets) {
+    if (estimatedPose.isEmpty()) {
+      HighBackCameraCurStdDevs = Constants.kSingleTagStdDevs;
+    } else {
+      var estStdDevs = Constants.kSingleTagStdDevs;
+      int numTags = 0;
+      double avgDist = 0;
+      for (var tgt : targets) {
+        // Get the pose of the tag seen
+        var tagPose = HighBackCameraPoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+
+        // If tag seen is not part of the field, ignore it and go to the next target
+        if (tagPose.isEmpty()) continue;
+
+        numTags++;
+        avgDist += tagPose.get().toPose2d().getTranslation().getDistance(
+          estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+      }
+
+      if (numTags == 0) {
+        // No tags visible. Default to single-tag std devs
+        HighBackCameraCurStdDevs = Constants.kSingleTagStdDevs;
+      } else {
+        // One or more tags visible, run the full heuristic.
+        avgDist /= numTags;
+        // Decrease std devs if multiple targets are visible
+        if (numTags > 1)
+          estStdDevs = Constants.kSMultiTagStdDevs;
+        // Increase std devs based on (average) distance
+        if (numTags == 1 && avgDist > 4)
+          estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+        else
+          estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+          HighBackCameraCurStdDevs = estStdDevs;
+      }
+    }
+  }
+
+  public Matrix<N3, N1> getHighBackCameraEstStdDevs() {
+    return HighBackCameraCurStdDevs;
+  }
+  // endregion
 
   public Optional<Double> getAngleToProcessor() {
     var frames = HighFcamera.getAllUnreadResults();

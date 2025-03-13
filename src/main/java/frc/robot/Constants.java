@@ -4,11 +4,15 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
@@ -162,12 +166,14 @@ public class Constants {
    public static final String LowCameraName = "LowCamera";
    public static final String HighFrontCameraName = "HighFcamera";
    public static final String HighBackCameraName = "HighBcamera";
+
    public static final int BlueProcessorTag = 16;
    public static final int RedProcessorTag = 3;
    public static final int[] BlueReef = {17,18,19,20,21,22};
    public static final int[] RedReef = {6,7,8,9,10,11};
    public static final int[] BlueCoralstation = {12,13};
    public static final int[] RedCoralstation = {1,2};
+
    public static final Transform3d robotToLowCam = new Transform3d(
         new Translation3d(Units.inchesToMeters(5.857), Units.inchesToMeters(8.831), Units.inchesToMeters(11.75)), 
         new Rotation3d(0,0,Units.degreesToRadians(-26)));
@@ -177,5 +183,10 @@ public class Constants {
    public static final Transform3d robotToHighBackCam = new Transform3d(
         new Translation3d(Units.inchesToMeters(-0.648), Units.inchesToMeters(9.239), Units.inchesToMeters(38.239)),
         new Rotation3d(Units.degreesToRadians(180),Units.degreesToRadians(-140),0));
+   
+  public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4,4,8); // TODO Adjust these standard deviations if necessary
+  public static final Matrix<N3, N1> kSMultiTagStdDevs = VecBuilder.fill(0.5,0.5,1);
 
+  public static final Matrix<N3, N1> kStateStdDevs = VecBuilder.fill(0.1,0.1,0.1);
+  public static final Matrix<N3, N1> kVisionStdDevs = VecBuilder.fill(1,1,1);
 } 

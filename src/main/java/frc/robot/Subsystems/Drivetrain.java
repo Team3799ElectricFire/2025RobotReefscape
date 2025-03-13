@@ -53,14 +53,12 @@ public class Drivetrain extends SubsystemBase {
   private SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
     Constants.kDriveKinematics, 
     Pidgey.getRotation2d(), 
-    new SwerveModulePosition[] {
-      FrontRightModule.getPosition(),
-      FrontLeftModule.getPosition(),
-      BackRightModule.getPosition(),
-      BackLeftModule.getPosition()
-  }, new Pose2d());
+    getModulePositions(),
+    new Pose2d(),
+    Constants.kStateStdDevs,
+    Constants.kVisionStdDevs);
 
-  public Cameras eyeballCameras = new Cameras();
+  public Cameras Cams = new Cameras();
   public boolean IsAimingBackCamera = false;
   public boolean IsAimingLowCamera = false;
   public boolean IsAimingHighCamera = false;
@@ -103,15 +101,15 @@ public class Drivetrain extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    poseEstimator.update(Pidgey.getRotation2d(), new SwerveModulePosition[] {
-        FrontRightModule.getPosition(),
-        FrontLeftModule.getPosition(),
-        BackRightModule.getPosition(),
-        BackLeftModule.getPosition()
-    });
+    
+    // Update pose estimator with info from gyro and swerve modules
+    poseEstimator.update(Pidgey.getRotation2d(), getModulePositions());
 
+    // Update pose estimator with info from cameras
+    UptadePoseWithCameras(); // TODO enable here to always use pose estimation from cameras, Auto and teleop
+
+    // Send data to driver station
     publisher.set(getModuleState());
-
     printDS();
   }
 
@@ -133,12 +131,7 @@ public class Drivetrain extends SubsystemBase {
   public void resetPose(Pose2d pose) {
     poseEstimator.resetPosition(
         Pidgey.getRotation2d(),
-        new SwerveModulePosition[] {
-            FrontRightModule.getPosition(),
-            FrontLeftModule.getPosition(),
-            BackRightModule.getPosition(),
-            BackLeftModule.getPosition()
-        },
+        getModulePositions(),
         pose);
   }
 
@@ -155,42 +148,36 @@ public class Drivetrain extends SubsystemBase {
 
   public Command TurnOnBackCameraCommand(){
     return runOnce(() -> {
-      //eyeballCameras.setHighBDriverMode(false);
       IsAimingBackCamera = true;
     }).asProxy();
   }
 
   public Command TurnOffBackCameraCommand(){
     return runOnce(() -> {
-      //eyeballCameras.setHighBDriverMode(true);
       IsAimingBackCamera = false;
     }).asProxy();
   }
 
   public Command TurnOnHighFCameraCommand(){
     return runOnce(() -> {
-      //eyeballCameras.setHighFDriverMode(false);
       IsAimingHighCamera = true;
     }).asProxy();
   }
 
   public Command TurnOffHighFCameraCommand(){
     return runOnce(() -> {
-      //eyeballCameras.setHighFDriverMode(true);
       IsAimingHighCamera = false;
     }).asProxy();
   }
 
   public Command TurnOnLowCameraCommand(){
     return runOnce(() -> {
-      //eyeballCameras.setLowDriverMode(false);
       IsAimingLowCamera = true;
     }).asProxy();
   }
 
   public Command TurnOffLowCameraCommand(){
     return runOnce(() -> {
-      //eyeballCameras.setLowDriverMode(true);
       IsAimingLowCamera = false;
     }).asProxy();
   }
@@ -210,27 +197,33 @@ public class Drivetrain extends SubsystemBase {
     BackRightModule.setDesiredState(moduleStates[2]);
     BackLeftModule.setDesiredState(moduleStates[3]);
 
-    UptadePoseWithCameras();
+    //UptadePoseWithCameras(); // TODO enable here to only use pose estimation from cameras in Auto, not teleop
   }
 
   private void UptadePoseWithCameras(){
-    var EstimatedPose = eyeballCameras.getEstimatedPoseLowCamera();
-    if (EstimatedPose.isPresent()){
-      var result = EstimatedPose.get();
-      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds);
-    }
+    var EstimatedLowPose = Cams.getEstimatedPoseLowCamera();
+    EstimatedLowPose.ifPresent(
+      est -> {
+        var estStdDevs = Cams.getLowCameraEstStdDevs();
+        addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+      }
+    );
 
-    EstimatedPose = eyeballCameras.getEstimatedPoseHighBackCamera();
-    if (EstimatedPose.isPresent()){
-      var result = EstimatedPose.get();
-      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds);
-    }
+    var EstimatedHighFrontPose = Cams.getEstimatedPoseHighBackCamera();
+    EstimatedHighFrontPose.ifPresent(
+      est -> {
+        var estStdDevs = Cams.getHighFrontCameraEstStdDevs();
+        addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+      }
+    );
 
-    EstimatedPose = eyeballCameras.getEstimatedPoseHighFrontCamera();
-    if (EstimatedPose.isPresent()){
-      var result = EstimatedPose.get();
-      addVisionMeasurement(result.estimatedPose.toPose2d(), result.timestampSeconds);
-    }
+    var EstimatedHighBackPose = Cams.getEstimatedPoseHighFrontCamera();
+    EstimatedHighBackPose.ifPresent(
+      est -> {
+        var estStdDevs = Cams.getHighBackCameraEstStdDevs();
+        addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+      }
+    );
   }
 
   public void driveRobotRelative(double xSpeed, double ySpeed, double rot) {
@@ -295,6 +288,15 @@ public class Drivetrain extends SubsystemBase {
     states[3] = BackLeftModule.getState();
 
     return states;
+  }
+
+  public SwerveModulePosition[] getModulePositions() {
+    return new SwerveModulePosition[] {
+        FrontRightModule.getPosition(),
+        FrontLeftModule.getPosition(),
+        BackRightModule.getPosition(),
+        BackLeftModule.getPosition()
+    };
   }
 
   public void setModuleStates(SwerveModuleState[] desiredStates) {

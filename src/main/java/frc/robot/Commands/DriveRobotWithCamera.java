@@ -29,7 +29,7 @@ public class DriveRobotWithCamera extends Command {
   public DriveRobotWithCamera(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier,
       DoubleSupplier rotSupplier) {
     this.Drivetrain = drivetrain;
-    this.Cams = drivetrain.eyeballCameras;
+    this.Cams = drivetrain.Cams;
     this.XSupplier = xSupplier;
     this.YSupplier = ySupplier;
     this.RotSupplier = rotSupplier;
