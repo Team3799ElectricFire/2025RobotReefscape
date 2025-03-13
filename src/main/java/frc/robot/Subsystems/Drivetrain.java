@@ -21,6 +21,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -67,11 +68,14 @@ public class Drivetrain extends SubsystemBase {
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
   private final StructArrayPublisher<SwerveModuleState> publisher;
+  private final StructPublisher<Pose2d> posePublisher;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
     publisher = NetworkTableInstance.getDefault()
       .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+    posePublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("/RobotPose", Pose2d.struct).publish();
 
     // Autobuilder
     AutoBuilder.configure(
@@ -110,6 +114,7 @@ public class Drivetrain extends SubsystemBase {
 
     // Send data to driver station
     publisher.set(getModuleState());
+    posePublisher.set(getPose());
     printDS();
   }
 
@@ -209,7 +214,7 @@ public class Drivetrain extends SubsystemBase {
       }
     );
 
-    var EstimatedHighFrontPose = Cams.getEstimatedPoseHighBackCamera();
+    var EstimatedHighFrontPose = Cams.getEstimatedPoseHighFrontCamera();
     EstimatedHighFrontPose.ifPresent(
       est -> {
         var estStdDevs = Cams.getHighFrontCameraEstStdDevs();
@@ -217,7 +222,7 @@ public class Drivetrain extends SubsystemBase {
       }
     );
 
-    var EstimatedHighBackPose = Cams.getEstimatedPoseHighFrontCamera();
+    var EstimatedHighBackPose = Cams.getEstimatedPoseHighBackCamera();
     EstimatedHighBackPose.ifPresent(
       est -> {
         var estStdDevs = Cams.getHighBackCameraEstStdDevs();

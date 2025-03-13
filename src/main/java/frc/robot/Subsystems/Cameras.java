@@ -31,19 +31,19 @@ public class Cameras {
   private PhotonCamera LowCamera = new PhotonCamera(Constants.LowCameraName);
   private PhotonPoseEstimator LowCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToLowCam);
-  private Matrix<N3,N1> LowCameraCurStdDevs;
+  private Matrix<N3,N1> LowCameraCurStdDevs = Constants.kSingleTagStdDevs;
 
   // High Front Camera
   private PhotonCamera HighFcamera = new PhotonCamera(Constants.HighFrontCameraName);
   private PhotonPoseEstimator HighFrontCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighFrontCam);
-  private Matrix<N3,N1> HighFrontCameraCurStdDevs;
+  private Matrix<N3,N1> HighFrontCameraCurStdDevs = Constants.kSingleTagStdDevs;
 
   // High Back Camera
   private PhotonCamera HighBcamera = new PhotonCamera(Constants.HighBackCameraName);
   private PhotonPoseEstimator HighBackCameraPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, Constants.robotToHighBackCam);
-  private Matrix<N3,N1> HighBackCameraCurStdDevs;
+  private Matrix<N3,N1> HighBackCameraCurStdDevs = Constants.kSingleTagStdDevs;
 
   /** Creates a new Cameras. */
   public Cameras() {
