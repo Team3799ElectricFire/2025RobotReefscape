@@ -70,7 +70,7 @@ public class RobotContainer {
     Driver.leftBumper().onTrue(new SequentialCommandGroup(
         Elevate.LockElevatorCommand(),
         new PickUpCoral(CoralIntake).andThen(new SecureCoral(CoralIntake)),
-        Elevate.UnLockElevatorCommand()));
+        Elevate.UnLockElevatorCommand()).onlyIf(Elevate::IsLow));
     Driver.leftTrigger().onTrue(new ConditionalCommand(
         new ScoreCoralLow(CoralIntake),
         new ScoreCoral(CoralIntake),

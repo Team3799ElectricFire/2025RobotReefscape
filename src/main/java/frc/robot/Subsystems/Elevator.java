@@ -129,7 +129,7 @@ public class Elevator extends SubsystemBase {
   public Command LockElevatorCommand() {
     return runOnce(() -> {
       LockElevator();
-    });
+    }).asProxy();
   }
 
   public void UnLockElevator() {
@@ -139,7 +139,7 @@ public class Elevator extends SubsystemBase {
   public Command UnLockElevatorCommand() {
     return runOnce(() -> {
       UnLockElevator();
-    });
+    }).asProxy();
   }
 
   public double getHeight() {
