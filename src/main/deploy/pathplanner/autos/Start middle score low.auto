@@ -28,6 +28,12 @@
           "data": {
             "name": "ScoreCoral"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Back Up 5R"
+          }
         }
       ]
     }

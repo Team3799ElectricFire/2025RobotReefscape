@@ -33,6 +33,12 @@
           "data": {
             "name": "ElevatorLevel2"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Back Up 5R"
+          }
         }
       ]
     }
