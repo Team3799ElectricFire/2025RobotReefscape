@@ -99,16 +99,18 @@ public class Constants {
     public static final double WristMotionAllowedError = 1; // degrees
 
     // Motor Speeds
-    public static final double TurboSpeedMultiple = 0.90;
     public static final double HighSpeedMultiple = 1.0;
     public static final double LowSpeedMultiple = 0.50;
+    public static final double L2SpeedMultiple = 1.0;
+    public static final double L3SpeedMultiple = 0.5;
+    public static final double L4SpeedMultiple = 0.3;
     public static final double minThumbstickMagnitude = 0.1;
     public static final double ElevatorSpeed = 0.25;
     public static final double AlgaeIntakeSpeed = 0.3;
     public static final double AlgaeOutakeSpeed = 1.0;
     public static final double AlgaeHold = 0.10;
-    public static final double CoralIntakeSpeed = 0.30;   //Doubled all coral command speeds
-    public static final double CoralSecureSpeed = -0.15;  //-0.10 , Formerly -0.10
+    public static final double CoralIntakeSpeed = 0.30;
+    public static final double CoralSecureSpeed = -0.15;
     public static final double CoralOutakeSpeed = 0.35;
     public static final double CoralShelfSpeed = 0.10;
     public static final double ClimberDownSpeed = -1.0;

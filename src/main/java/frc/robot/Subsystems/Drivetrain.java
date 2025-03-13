@@ -355,12 +355,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void setDriveRobotRelative() {
     this._DriveRobotRelative = true;
-    // System.out.println("Set Robot Relative");
   }
 
   public void setDriveFieldRelative() {
     this._DriveRobotRelative = false;
-    // System.out.println("Set Field Relative");
   }
 
   public void toggleDriveRobotRelative() {
@@ -373,12 +371,14 @@ public class Drivetrain extends SubsystemBase {
     }).asProxy();
   }
 
-  public boolean getDriveRobotRelative() {
-    return this._DriveRobotRelative;
+  public Command setDriveSpeeCommand(double newSpeed) {
+    return runOnce(() -> {
+      SpeedMultiple = newSpeed;
+    }).asProxy();
   }
 
-  public void setTurboSpeed() {
-    SpeedMultiple = Constants.TurboSpeedMultiple;
+  public boolean getDriveRobotRelative() {
+    return this._DriveRobotRelative;
   }
 
   public void setHighSpeed() {

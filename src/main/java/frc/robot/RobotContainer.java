@@ -63,7 +63,6 @@ public class RobotContainer {
     Drivetrain.setDefaultCommand(new DriveRobotWithCamera(Drivetrain, Driver::getLeftY, Driver::getLeftX, Driver::getRightX));
     Driver.start().onTrue(Drivetrain.ZeroHeadingCommand());
     Driver.back().onTrue(Drivetrain.toggleDriveRobotRelativeCommand());
-
     Driver.leftStick().onTrue(Drivetrain.setLowSpeedCommand());
     Driver.rightStick().onTrue(Drivetrain.setHgihSpeedCommand());
 
@@ -104,10 +103,18 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator DOWN Command", new ElevatorDown(Elevate));
     SmartDashboard.putData("Home Elevator Command", new ElevatorHome(Elevate));
     SmartDashboard.putData("Reset Elevator Encoder", Elevate.ZeroEncoderCommand());
-    Driver.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
-    Driver.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
-    Driver.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
-    Driver.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+    Driver.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.HighSpeedMultiple)
+    ));
+    Driver.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.L2SpeedMultiple)
+    ));
+    Driver.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.L3SpeedMultiple)
+    ));
+    Driver.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
+    ));
 
     Copilot.povDown().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
     Copilot.povRight().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
@@ -115,14 +122,12 @@ public class RobotContainer {
     Copilot.povUp().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
 
     // Cameras
-    if (Copilot.isConnected()) {
-      Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand());
-      Copilot.a().onFalse(Drivetrain.TurnOffHighFCameraCommand());
-      Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand());
-      Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
-      Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand());
-      Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
-    }
+    Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand());
+    Copilot.a().onFalse(Drivetrain.TurnOffHighFCameraCommand());
+    Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand());
+    Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
+    Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand());
+    Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
   }
 
   public Command getAutonomousCommand() {
