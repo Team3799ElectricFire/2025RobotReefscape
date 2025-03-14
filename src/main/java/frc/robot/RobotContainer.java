@@ -116,10 +116,18 @@ public class RobotContainer {
       Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
     ));
 
-    Copilot.povDown().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
-    Copilot.povRight().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
-    Copilot.povLeft().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
-    Copilot.povUp().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
+    Copilot.povDown().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.HighSpeedMultiple)
+    ));
+    Copilot.povLeft().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.L2SpeedMultiple)
+    ));
+    Copilot.povRight().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.L3SpeedMultiple)
+    ));
+    Copilot.povUp().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4).alongWith(
+      Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
+    ));
 
     // Cameras
     Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand());
@@ -128,6 +136,10 @@ public class RobotContainer {
     Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
     Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand());
     Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
+
+    // Driver Assist
+    Copilot.rightTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, true));
+    Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, false));
   }
 
   public Command getAutonomousCommand() {

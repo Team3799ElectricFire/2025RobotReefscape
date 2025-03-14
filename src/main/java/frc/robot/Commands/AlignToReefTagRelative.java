@@ -8,9 +8,12 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Drivetrain;
@@ -19,9 +22,10 @@ import frc.robot.Subsystems.Drivetrain;
 public class AlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
   private boolean isRightScore;
-  private Timer dontSeeTagTimer, stopTimer;
+  private Timer abortTimer, settleTimer;
   private Drivetrain drivebase;
   private int tagID = -1;
+  private final StructPublisher<Pose2d> goalPublisher;
 
   public AlignToReefTagRelative(Drivetrain drivebase, boolean isRightScore) {
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0);  // Vertical movement
@@ -30,14 +34,17 @@ public class AlignToReefTagRelative extends Command {
     this.isRightScore = isRightScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
+
+    goalPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("/GoalPose", Pose2d.struct).publish();
   }
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    this.stopTimer = new Timer();
-    this.stopTimer.start();
-    this.dontSeeTagTimer = new Timer();
-    this.dontSeeTagTimer.start();
+    this.settleTimer = new Timer();
+    this.settleTimer.start();
+    this.abortTimer = new Timer();
+    this.abortTimer.start();
 
     var targetTag = drivebase.Cams.getLowCameraTag();
     // End this command instantly if no tag was seen
@@ -49,30 +56,47 @@ public class AlignToReefTagRelative extends Command {
     // End this command instantly if tag seen is not part of field
     if (targetPose.isEmpty()) this.end(false);
 
-    // rotController.setSetpoint(Constants.ROT_SETPOINT_REEF_ALIGNMENT);
-    // rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
+    Pose2d offset = new Pose2d(
+      new Translation2d(Constants.X_SETPOINT_REEF_ALIGNMENT, isRightScore ? Constants.Y_SETPOINT_REEF_ALIGNMENT : -Constants.Y_SETPOINT_REEF_ALIGNMENT),
+      new Rotation2d());
+    Pose2d tagPose = targetPose.get().toPose2d();
+    
+    // Goal pose we want robot to reach, relative to AprilTag
+    Pose2d goalPose = tagPose.plus(new Transform2d( // Tag Pose2d of AprilTag and add...
+      offset.rotateBy(tagPose.getRotation()).getTranslation(), // ... desired offset, rotated by angle of AprilTag...
+      Rotation2d.fromDegrees(180))); // ... and facing the opposite direction, back towards AprilTag
 
-    // xController.setSetpoint(Constants.X_SETPOINT_REEF_ALIGNMENT);
-    // xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
+    // End this command instantly if goalPose is too far away
+    if (drivebase.getPose().getTranslation().getDistance(goalPose.getTranslation()) > 1) this.end(false);
+    
+    // Publish goalPose for debug
+    goalPublisher.set(goalPose);
 
-    // yController.setSetpoint(isRightScore ? Constants.Y_SETPOINT_REEF_ALIGNMENT : -Constants.Y_SETPOINT_REEF_ALIGNMENT);
-    // yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
+    // Set PID controller setpoints
+    rotController.setSetpoint(goalPose.getRotation().getDegrees());
+    rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
+
+    xController.setSetpoint(goalPose.getX());
+    xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
+
+    yController.setSetpoint(goalPose.getY());
+    yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    var targetTag = drivebase.Cams.getLowCameraTag();
-    targetTag.ifPresent(
-      tag -> {
-        if (tag.getFiducialId() == tagID) {
-          this.dontSeeTagTimer.reset();
+    Pose2d robotPose = drivebase.getPose();
 
-          
+    double xSpeed = xController.calculate(robotPose.getX());
+    double ySpeed = yController.calculate(robotPose.getY());
+    double rotSpeed = rotController.calculate(robotPose.getRotation().getDegrees());
 
-        }
-      }
-    );
+    drivebase.driveFieldRelative(xSpeed, ySpeed, rotSpeed);
+
+    if (!xController.atSetpoint() || !yController.atSetpoint() || !rotController.atSetpoint()) {
+      settleTimer.reset();
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -84,7 +108,7 @@ public class AlignToReefTagRelative extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return this.dontSeeTagTimer.hasElapsed(Constants.DONT_SEE_TAG_WAIT_TIME) ||
-      stopTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
+    return this.abortTimer.hasElapsed(Constants.REEF_ALIGN_MAX_TIME) ||
+      settleTimer.hasElapsed(Constants.POSE_VALIDATION_TIME);
   }
 }
