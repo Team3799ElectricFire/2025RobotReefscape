@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.135,
-        "y": 6.95
+        "x": 1.1161184210526316,
+        "y": 6.978865131578947
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4131666900655309,
-        "y": 6.468130481072846
+        "x": 1.3942851111181624,
+        "y": 6.4969956126517925
       },
       "isLocked": false,
       "linkedName": "Blue Coral Station"

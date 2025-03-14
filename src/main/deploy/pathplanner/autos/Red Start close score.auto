@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red Start to 6R"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoralLow"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "6R to Red Coral Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralFromStation"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red Coral Station to 1L"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoralLow"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
