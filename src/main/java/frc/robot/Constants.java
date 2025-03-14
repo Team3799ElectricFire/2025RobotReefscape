@@ -111,7 +111,7 @@ public class Constants {
     public static final double AlgaeHold = 0.10;
     public static final double CoralIntakeSpeed = 0.30;
     public static final double CoralSecureSpeed = -0.15;
-    public static final double CoralOutakeSpeed = 0.35;
+    public static final double CoralOutakeSpeed = 0.45;
     public static final double CoralShelfSpeed = 0.10;
     public static final double ClimberDownSpeed = -1.0;
     public static final double ClimberUpSpeed = 1.0;
@@ -120,8 +120,8 @@ public class Constants {
     // Position Set Points
     public static final double ElevatorLevel1 = 0;// centimeters
     public static final double ElevatorLevel2 = 27.5;// centimeters, previously 30- JB 3/9/25
-    public static final double ElevatorLevel3 = 68.5;// centimeters, previously 69.5- JB 3/9/25
-    public static final double ElevatorLevel4 = 135;// centimeters
+    public static final double ElevatorLevel3 = 68;// centimeters, previously 69.5- JB 3/9/25
+    public static final double ElevatorLevel4 = 131;// centimeters
     public static final double ElevatorSoftLimMax = 137;//cm
     public static final double ElevatorSoftLimCoral = 42;//cm (highest safe height with coral in elevator's way)
     public static final double ElevatorSoftLimMin = 0;//cm 
@@ -140,8 +140,8 @@ public class Constants {
     public static final double teleCameraHoldFactor = 0.10; // Teleop vision targeting P-gain, 1/degrees
 
     // Path Planner
-    public static final double MassKG = 30;
-    public static final double MOI = 20;
+    public static final double MassKG = 57;
+    public static final double MOI = 6.883;
     public static final ModuleConfig SwerveConfig = new ModuleConfig(
             Units.inchesToMeters(2),
             kMaxSpeedMetersPerSecond,
@@ -155,7 +155,7 @@ public class Constants {
             SwerveConfig,
             FrontRightTranslation, FrontLeftTranslation, BackRightTranslation, BackLeftTranslation);
     public static final PIDConstants TranslationPIDconstants = new PIDConstants(
-            25,
+            30,
             0.75,
             0.0);
     public static final PIDConstants RotationPIDconstants = new PIDConstants(

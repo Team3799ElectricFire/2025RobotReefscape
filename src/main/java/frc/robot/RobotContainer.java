@@ -94,6 +94,19 @@ public class RobotContainer {
         new ScoreAlgae(Algae)));
     Driver.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
 
+    Copilot.rightBumper().whileTrue(new SequentialCommandGroup(
+        new ConditionalCommand(
+            Wrost.GoToPositionCommand(Constants.WristFloorPickUp),
+            Wrost.GoToPositionCommand(Constants.WristReefPickUp),
+            Elevate::IsLow),
+        new PickUpAlgae(Algae)));
+    Copilot.rightBumper().onFalse(new SequentialCommandGroup(
+      Wrost.GoToPositionCommand(Constants.WristTravel)));
+    Copilot.rightTrigger().whileTrue(new SequentialCommandGroup(
+        Wrost.GoToPositionCommand(Constants.WristScore),
+        new ScoreAlgae(Algae)));
+    Copilot.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
+
     // Climber
     Driver.povDown().whileTrue(new ClimberDown(Climber));
     Driver.povUp().whileTrue(new ClimberUp(Climber));
@@ -130,16 +143,16 @@ public class RobotContainer {
     ));
 
     // Cameras
-    Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand());
+    Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand()); // A == Processor (score algae)
     Copilot.a().onFalse(Drivetrain.TurnOffHighFCameraCommand());
-    Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand());
+    Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand()); // Y == Reef (score coral)
     Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
-    Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand());
+    Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand()); // B == Coral Station (pickup coral)
     Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
 
     // Driver Assist
-    Copilot.rightTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, true));
-    Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, false));
+    //Copilot.rightTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, true));
+    //Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, false));
   }
 
   public Command getAutonomousCommand() {
