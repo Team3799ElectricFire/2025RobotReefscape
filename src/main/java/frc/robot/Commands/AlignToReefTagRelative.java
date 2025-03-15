@@ -4,17 +4,12 @@
 
 package frc.robot.Commands;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Drivetrain;
@@ -25,7 +20,6 @@ public class AlignToReefTagRelative extends Command {
   private boolean isLeftScore;
   private Timer abortTimer, settleTimer;
   private Drivetrain drivebase;
-  private int tagID = -1;
   private Pose2d goalPose;
   private final StructPublisher<Pose2d> goalPublisher;
 

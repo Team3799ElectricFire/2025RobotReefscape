@@ -149,6 +149,8 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putBoolean("Back Camera On", IsAimingBackCamera);
     SmartDashboard.putBoolean("High Camera On", IsAimingHighCamera);
     SmartDashboard.putBoolean("Low Camera On", IsAimingLowCamera);
+    SmartDashboard.putBoolean("Facing Reef", facingReef);
+    SmartDashboard.putNumber("Wall Distance", wallDistance);
   }
 
   public void setAlliance(Alliance color) {
