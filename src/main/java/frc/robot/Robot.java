@@ -72,6 +72,11 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    Optional<Alliance> ally = DriverStation.getAlliance();
+    if (ally.isPresent()) {
+      m_robotContainer.setAlliance(ally.get());
+    }
   }
 
   @Override

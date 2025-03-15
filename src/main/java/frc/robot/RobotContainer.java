@@ -56,6 +56,7 @@ public class RobotContainer {
 
   public void setAlliance(Alliance color) {
     Cams.setAlliance(color);
+    Drivetrain.setAlliance(color);
   }
 
   private void configureBindings() {
