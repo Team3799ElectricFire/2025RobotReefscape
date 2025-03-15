@@ -198,7 +198,7 @@ public class Constants {
   public static final double Y_REEF_ALIGNMENT_P = 2.0;
   public static final double ROT_REEF_ALIGNMENT_P = 0.0075;
 
-  public static final double X_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(-17.75);  // Vertical pose [m]
+  public static final double X_SETPOINT_REEF_ALIGNMENT = -1.2827;  // Vertical pose [m]
   public static final double X_TOLERANCE_REEF_ALIGNMENT = Units.inchesToMeters(1.0);
   public static final double Y_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(-6.5);  // Horizontal pose [m]
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = Units.inchesToMeters(1.0);

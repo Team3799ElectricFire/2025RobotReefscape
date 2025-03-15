@@ -70,6 +70,7 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d RotationCenter = new Translation2d();
   private final StructArrayPublisher<SwerveModuleState> publisher;
   private final StructPublisher<Pose2d> posePublisher;
+  private final StructPublisher<Pose2d> reefPublisher;
   
   private Alliance ourAlliance = Alliance.Red;
   public Pose2d reefReference = Pose2d.kZero;
@@ -82,6 +83,8 @@ public class Drivetrain extends SubsystemBase {
       .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     posePublisher = NetworkTableInstance.getDefault()
       .getStructTopic("/RobotPose", Pose2d.struct).publish();
+    reefPublisher = NetworkTableInstance.getDefault()
+      .getStructTopic("/ReefReference", Pose2d.struct).publish();
 
     // Autobuilder
     AutoBuilder.configure(
@@ -137,6 +140,7 @@ public class Drivetrain extends SubsystemBase {
     // Send data to driver station
     publisher.set(getModuleState());
     posePublisher.set(getPose());
+    reefPublisher.set(reefReference);
     printDS();
   }
 

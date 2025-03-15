@@ -152,8 +152,7 @@ public class RobotContainer {
     Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
 
     // Driver Assist
-    //Copilot.rightTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, true));
-    //Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, false));
+    Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, Copilot::getLeftX));
   }
 
   public Command getAutonomousCommand() {

@@ -4,6 +4,8 @@
 
 package frc.robot.Commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -17,13 +19,13 @@ import frc.robot.Subsystems.Drivetrain;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
-  private boolean isLeftScore;
+  private DoubleSupplier isLeftScore;
   private Timer abortTimer, settleTimer;
   private Drivetrain drivebase;
   private Pose2d goalPose;
   private final StructPublisher<Pose2d> goalPublisher;
 
-  public AlignToReefTagRelative(Drivetrain drivebase, boolean isLeftScore) {
+  public AlignToReefTagRelative(Drivetrain drivebase, DoubleSupplier isLeftScore) {
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0); // Vertical movement
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0); // Horitontal movement
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0); // Rotation
@@ -43,10 +45,12 @@ public class AlignToReefTagRelative extends Command {
     this.abortTimer = new Timer();
     this.abortTimer.start();
 
+    boolean isLeft = isLeftScore.getAsDouble() < 0;
+    
     goalPose = new Pose2d(
         drivebase.reefReference.getTranslation().plus(
             new Translation2d(Constants.X_SETPOINT_REEF_ALIGNMENT,
-                Constants.Y_SETPOINT_REEF_ALIGNMENT * (isLeftScore ? -1 : 1))
+                Constants.Y_SETPOINT_REEF_ALIGNMENT * (isLeft ? -1 : 1))
                 .rotateBy(drivebase.reefReference.getRotation())),
         drivebase.reefReference.getRotation());
 
