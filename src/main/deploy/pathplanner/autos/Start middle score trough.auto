@@ -5,28 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Center Start to 5R"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "ElevatorLevel2"
-                }
-              }
-            ]
+            "pathName": "Center Start to 5R"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreCoral"
+            "name": "ScoreCoralLow"
           }
         },
         {
