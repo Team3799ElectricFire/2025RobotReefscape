@@ -23,6 +23,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -69,6 +70,11 @@ public class Drivetrain extends SubsystemBase {
   private Translation2d RotationCenter = new Translation2d();
   private final StructArrayPublisher<SwerveModuleState> publisher;
   private final StructPublisher<Pose2d> posePublisher;
+  
+  private Alliance ourAlliance = Alliance.Red;
+  public Pose2d reefReference = Pose2d.kZero;
+  private boolean facingReef = false;
+  private double wallDistance = 0.0;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -112,6 +118,22 @@ public class Drivetrain extends SubsystemBase {
     // Update pose estimator with info from cameras
     UptadePoseWithCameras(); // TODO enable here to always use pose estimation from cameras, Auto and teleop
 
+    // Track reef's location
+    Translation2d reefCenter = (ourAlliance == Alliance.Blue) ? Constants.kReefCenterBlue : Constants.kReefCenterRed;
+    Translation2d reefTranslation = getPose().getTranslation().minus(reefCenter);
+    Rotation2d reefAngle = new Rotation2d(
+        Math.floor(
+            reefCenter.minus(getPose().getTranslation()).getAngle().plus(
+                new Rotation2d(Math.PI / 6.0)).getRadians() /
+                (Math.PI / 3.0))
+            * (Math.PI / 3.0));
+    reefReference = new Pose2d(reefCenter, reefAngle);
+    facingReef = epsilonEquals(0.0, reefAngle.minus(getPose().getRotation()).getRadians(),
+        Constants.kFacingReefTolerance);
+    wallDistance = Math.max(0.0,
+        reefAngle.rotateBy(Rotation2d.kPi).minus(reefTranslation.getAngle()).getCos() * reefTranslation.getNorm()
+            - Constants.kReefCenterToWallDistance);
+
     // Send data to driver station
     publisher.set(getModuleState());
     posePublisher.set(getPose());
@@ -127,6 +149,10 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putBoolean("Back Camera On", IsAimingBackCamera);
     SmartDashboard.putBoolean("High Camera On", IsAimingHighCamera);
     SmartDashboard.putBoolean("Low Camera On", IsAimingLowCamera);
+  }
+
+  public void setAlliance(Alliance color) {
+    ourAlliance = color;
   }
 
   public Pose2d getPose() {
@@ -420,6 +446,10 @@ public class Drivetrain extends SubsystemBase {
 
   public void resetRotationCenterRobot() {
     RotationCenter = new Translation2d();
+  }
+
+  public boolean epsilonEquals(double a, double b, double epsilon) {
+    return (a-epsilon <= b) && (a+epsilon >= b);
   }
 
 }

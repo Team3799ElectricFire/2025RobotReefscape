@@ -22,25 +22,23 @@ import frc.robot.Subsystems.Drivetrain;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
-  private boolean isRightScore;
+  private boolean isLeftScore;
   private Timer abortTimer, settleTimer;
   private Drivetrain drivebase;
   private int tagID = -1;
   private Pose2d goalPose;
-  private final StructPublisher<Pose2d> goalPublisher, tagPublisher;
+  private final StructPublisher<Pose2d> goalPublisher;
 
-  public AlignToReefTagRelative(Drivetrain drivebase, boolean isRightScore) {
+  public AlignToReefTagRelative(Drivetrain drivebase, boolean isLeftScore) {
     xController = new PIDController(Constants.X_REEF_ALIGNMENT_P, 0.0, 0); // Vertical movement
     yController = new PIDController(Constants.Y_REEF_ALIGNMENT_P, 0.0, 0); // Horitontal movement
     rotController = new PIDController(Constants.ROT_REEF_ALIGNMENT_P, 0, 0); // Rotation
-    this.isRightScore = isRightScore;
+    this.isLeftScore = isLeftScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
 
     goalPublisher = NetworkTableInstance.getDefault()
         .getStructTopic("/GoalPose", Pose2d.struct).publish();
-    tagPublisher = NetworkTableInstance.getDefault()
-        .getStructTopic("/TagPose", Pose2d.struct).publish();
   }
 
   // Called when the command is initially scheduled.
@@ -51,46 +49,26 @@ public class AlignToReefTagRelative extends Command {
     this.abortTimer = new Timer();
     this.abortTimer.start();
 
-    var targetTag = drivebase.Cams.getLowCameraTag();
-    // End this command instantly if no tag was seen
-    if (targetTag.isPresent()) {
-      tagID = targetTag.get().getFiducialId();
-
-      SmartDashboard.putNumber("TAG SEEN", tagID);
-
-      var targetPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded).getTagPose(tagID);
-
-      // End this command instantly if tag seen is not part of field
-      if (targetPose.isPresent()) {
-        Pose2d tagPose = targetPose.get().toPose2d();
-
-        // Publish tagPose for debug
-        tagPublisher.set(tagPose);
-
-        Pose2d offset = new Pose2d(
+    goalPose = new Pose2d(
+        drivebase.reefReference.getTranslation().plus(
             new Translation2d(Constants.X_SETPOINT_REEF_ALIGNMENT,
-                isRightScore ? -Constants.Y_SETPOINT_REEF_ALIGNMENT : Constants.Y_SETPOINT_REEF_ALIGNMENT),
-            new Rotation2d());
+                Constants.Y_SETPOINT_REEF_ALIGNMENT * (isLeftScore ? -1 : 1))
+                .rotateBy(drivebase.reefReference.getRotation())),
+        drivebase.reefReference.getRotation());
 
-        // Goal pose we want robot to reach, relative to AprilTag
-        goalPose = tagPose.plus(new Transform2d( // Tag Pose2d of AprilTag and add...
-            offset.rotateBy(tagPose.getRotation()).getTranslation(), // ... desired offset, rotated by angle of AprilTag...
-            Rotation2d.fromDegrees(180))); // ... and facing the opposite direction, back towards AprilTag
+    // Publish goalPose for debug
+    goalPublisher.set(goalPose);
 
-        // Publish goalPose for debug
-        goalPublisher.set(goalPose);
+    // Set PID controller setpoints
+    rotController.setSetpoint(goalPose.getRotation().getDegrees());
+    rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
 
-        // Set PID controller setpoints
-        rotController.setSetpoint(goalPose.getRotation().getDegrees());
-        rotController.setTolerance(Constants.ROT_TOLERANCE_REEF_ALIGNMENT);
+    xController.setSetpoint(goalPose.getX());
+    xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
 
-        xController.setSetpoint(goalPose.getX());
-        xController.setTolerance(Constants.X_TOLERANCE_REEF_ALIGNMENT);
+    yController.setSetpoint(goalPose.getY());
+    yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
 
-        yController.setSetpoint(goalPose.getY());
-        yController.setTolerance(Constants.Y_TOLERANCE_REEF_ALIGNMENT);
-      }
-    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

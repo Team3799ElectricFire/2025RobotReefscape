@@ -200,11 +200,18 @@ public class Constants {
 
   public static final double X_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(-17.75);  // Vertical pose [m]
   public static final double X_TOLERANCE_REEF_ALIGNMENT = Units.inchesToMeters(1.0);
-  public static final double Y_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(6.5);  // Horizontal pose [m]
+  public static final double Y_SETPOINT_REEF_ALIGNMENT = Units.inchesToMeters(-6.5);  // Horizontal pose [m]
   public static final double Y_TOLERANCE_REEF_ALIGNMENT = Units.inchesToMeters(1.0);
   public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0;  // Rotation [deg]
   public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 3;
 
   public static final double POSE_VALIDATION_TIME = 0.3;
   public static final double REEF_ALIGN_MAX_TIME = 2.0;
+
+  public static final double kFieldLength = 17.548;
+  public static final double kFieldWidth = 8.052;
+  public static final double kReefCenterToWallDistance = 0.781;
+  public static final Translation2d kReefCenterBlue = new Translation2d(4.489, kFieldWidth/2.0);
+  public static final Translation2d kReefCenterRed = new Translation2d(kFieldLength-4.489, kFieldWidth/2.0);
+  public static final double kFacingReefTolerance = 1.0;
 } 
