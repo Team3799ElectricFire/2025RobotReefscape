@@ -64,8 +64,8 @@ public class RobotContainer {
     Drivetrain.setDefaultCommand(new DriveRobotWithCamera(Drivetrain, Driver::getLeftY, Driver::getLeftX, Driver::getRightX));
     Driver.start().onTrue(Drivetrain.ZeroHeadingCommand());
     Driver.back().onTrue(Drivetrain.toggleDriveRobotRelativeCommand());
-    Driver.leftStick().onTrue(Drivetrain.setLowSpeedCommand());
-    Driver.rightStick().onTrue(Drivetrain.setHgihSpeedCommand());
+    Driver.rightStick().onTrue(Drivetrain.setLowSpeedCommand());
+    Driver.leftStick().onTrue(Drivetrain.setHgihSpeedCommand());
 
     // Coral
     Driver.leftBumper().onTrue(new SequentialCommandGroup(
