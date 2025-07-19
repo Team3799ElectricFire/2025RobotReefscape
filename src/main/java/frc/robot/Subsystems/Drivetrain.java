@@ -28,8 +28,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import monologue.Logged;
+import monologue.Annotations.Log;
 
-public class Drivetrain extends SubsystemBase {
+public class Drivetrain extends SubsystemBase implements Logged {
   // Swerve modules
   private SwerveModule FrontRightModule = new SwerveModule(
       Constants.FrontRightDriveMotorID,
@@ -157,6 +159,7 @@ public class Drivetrain extends SubsystemBase {
     ourAlliance = color;
   }
 
+  @Log
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
@@ -338,6 +341,7 @@ public class Drivetrain extends SubsystemBase {
     }).asProxy();
   }
   
+  @Log
   public double getHeading() {
     return Pidgey.getRotation2d().getDegrees();
   }

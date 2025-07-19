@@ -16,8 +16,9 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.*;
 import frc.robot.Subsystems.*;
+import monologue.Logged;
 
-public class RobotContainer {
+public class RobotContainer implements Logged {
   private Drivetrain Drivetrain = new Drivetrain();
   private CoralIntake CoralIntake = new CoralIntake();
   private Climber Climber = new Climber();
