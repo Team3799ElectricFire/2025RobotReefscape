@@ -21,13 +21,13 @@ public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
   private Cameras Cams = Drivetrain.Cams;
   private CoralIntake CoralIntake = new CoralIntake();
-  private Climber Climber = new Climber();
+  //private Climber Claimber = new Climber();
   private AlgaeIntake Algae = new AlgaeIntake();
   private Elevator Elevate = new Elevator();
   private Wrist Wrost = new Wrist();
 
   private CommandXboxController Driver = new CommandXboxController(0);
-  private CommandXboxController Copilot = new CommandXboxController(1);
+  //private CommandXboxController Copilot = new CommandXboxController(1);
   private final SendableChooser<Command> autoChooser;
 
   public RobotContainer() {
@@ -51,7 +51,7 @@ public class RobotContainer {
 
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
+    //SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   public void setAlliance(Alliance color) {
@@ -61,11 +61,9 @@ public class RobotContainer {
 
   private void configureBindings() {
     // Drivetrain
-    Drivetrain.setDefaultCommand(new DriveRobotWithCamera(Drivetrain, Driver::getLeftY, Driver::getLeftX, Driver::getRightX));
+    Drivetrain.setDefaultCommand(new DriveRobot(Drivetrain, Driver::getLeftY, Driver::getLeftX, Driver::getRightX));
     Driver.start().onTrue(Drivetrain.ZeroHeadingCommand());
     Driver.back().onTrue(Drivetrain.toggleDriveRobotRelativeCommand());
-    Driver.rightStick().onTrue(Drivetrain.setLowSpeedCommand());
-    Driver.leftStick().onTrue(Drivetrain.setHgihSpeedCommand());
 
     // Coral
     Driver.leftBumper().onTrue(new SequentialCommandGroup(
@@ -78,81 +76,23 @@ public class RobotContainer {
         Elevate::IsLow));
 
     // Algae
-    SmartDashboard.putData("Wrist UP Command", new WristUp(Wrost));
-    SmartDashboard.putData("Wrist DOWN Command", new WristDown(Wrost));
-    SmartDashboard.putData("Home Wrist Command", new WristHome(Wrost));
-    SmartDashboard.putData("Reset Wrist Encoder", Wrost.HomeEncoderCommand());
-    Driver.rightBumper().whileTrue(new SequentialCommandGroup(
-        new ConditionalCommand(
-            Wrost.GoToPositionCommand(Constants.WristFloorPickUp),
-            Wrost.GoToPositionCommand(Constants.WristReefPickUp),
-            Elevate::IsLow),
-        new PickUpAlgae(Algae)));
-    Driver.rightBumper().onFalse(new SequentialCommandGroup(
-      Wrost.GoToPositionCommand(Constants.WristTravel)));
-    Driver.rightTrigger().whileTrue(new SequentialCommandGroup(
-        Wrost.GoToPositionCommand(Constants.WristScore),
-        new ScoreAlgae(Algae)));
-    Driver.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
-
-    Copilot.rightBumper().whileTrue(new SequentialCommandGroup(
-        new ConditionalCommand(
-            Wrost.GoToPositionCommand(Constants.WristFloorPickUp),
-            Wrost.GoToPositionCommand(Constants.WristReefPickUp),
-            Elevate::IsLow),
-        new PickUpAlgae(Algae)));
-    Copilot.rightBumper().onFalse(new SequentialCommandGroup(
-      Wrost.GoToPositionCommand(Constants.WristTravel)));
-    Copilot.rightTrigger().whileTrue(new SequentialCommandGroup(
-        Wrost.GoToPositionCommand(Constants.WristScore),
-        new ScoreAlgae(Algae)));
-    Copilot.rightTrigger().onFalse(Wrost.GoToPositionCommand(Constants.WristStart));
 
     // Climber
-    Driver.povDown().whileTrue(new ClimberDown(Climber));
-    Driver.povUp().whileTrue(new ClimberUp(Climber));
 
     // Elevator
     SmartDashboard.putData("Elevator UP Command", new ElevatorUp(Elevate));
     SmartDashboard.putData("Elevator DOWN Command", new ElevatorDown(Elevate));
     SmartDashboard.putData("Home Elevator Command", new ElevatorHome(Elevate));
     SmartDashboard.putData("Reset Elevator Encoder", Elevate.ZeroEncoderCommand());
-    Driver.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.HighSpeedMultiple)
-    ));
-    Driver.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.L2SpeedMultiple)
-    ));
-    Driver.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.L3SpeedMultiple)
-    ));
-    Driver.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
-    ));
-
-    Copilot.povDown().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.HighSpeedMultiple)
-    ));
-    Copilot.povLeft().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.L2SpeedMultiple)
-    ));
-    Copilot.povRight().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.L3SpeedMultiple)
-    ));
-    Copilot.povUp().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4).alongWith(
-      Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
-    ));
+    Driver.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1));
+    Driver.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2));
+    Driver.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3));
+    Driver.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4));
 
     // Cameras
-    Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand()); // A == Processor (score algae)
-    Copilot.a().onFalse(Drivetrain.TurnOffHighFCameraCommand());
-    Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand()); // Y == Reef (score coral)
-    Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
-    Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand()); // B == Coral Station (pickup coral)
-    Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
 
     // Driver Assist
-    Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, Copilot::getLeftX));
+    
   }
 
   public Command getAutonomousCommand() {

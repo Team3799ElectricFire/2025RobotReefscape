@@ -100,7 +100,7 @@ public class Constants {
 
     // Motor Speeds
     public static final double HighSpeedMultiple = 1.0;
-    public static final double LowSpeedMultiple = 0.50;
+    public static final double LowSpeedMultiple = 0.25;
     public static final double L2SpeedMultiple = 1.0;
     public static final double L3SpeedMultiple = 0.5;
     public static final double L4SpeedMultiple = 0.3;
