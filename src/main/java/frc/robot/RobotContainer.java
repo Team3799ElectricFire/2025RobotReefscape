@@ -19,7 +19,6 @@ import frc.robot.Subsystems.*;
 
 public class RobotContainer {
   private Drivetrain Drivetrain = new Drivetrain();
-  private Cameras Cams = Drivetrain.Cams;
   private CoralIntake CoralIntake = new CoralIntake();
   private Climber Climber = new Climber();
   private AlgaeIntake Algae = new AlgaeIntake();
@@ -55,7 +54,6 @@ public class RobotContainer {
   }
 
   public void setAlliance(Alliance color) {
-    Cams.setAlliance(color);
     Drivetrain.setAlliance(color);
   }
 
@@ -144,12 +142,7 @@ public class RobotContainer {
     ));
 
     // Cameras
-    Copilot.a().onTrue(Drivetrain.TurnOnHighFCameraCommand()); // A == Processor (score algae)
-    Copilot.a().onFalse(Drivetrain.TurnOffHighFCameraCommand());
-    Copilot.y().onTrue(Drivetrain.TurnOnLowCameraCommand()); // Y == Reef (score coral)
-    Copilot.y().onFalse(Drivetrain.TurnOffLowCameraCommand());
-    Copilot.b().onTrue(Drivetrain.TurnOnBackCameraCommand()); // B == Coral Station (pickup coral)
-    Copilot.b().onFalse(Drivetrain.TurnOffBackCameraCommand());
+    
 
     // Driver Assist
     Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, Copilot::getLeftX));

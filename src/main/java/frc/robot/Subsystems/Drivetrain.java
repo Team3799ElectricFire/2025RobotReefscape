@@ -60,10 +60,9 @@ public class Drivetrain extends SubsystemBase {
     Constants.kStateStdDevs,
     Constants.kVisionStdDevs);
 
-  public Cameras Cams = new Cameras();
-  public boolean IsAimingBackCamera = false;
-  public boolean IsAimingLowCamera = false;
-  public boolean IsAimingHighCamera = false;
+  private PoseEstCamera BottomCam = new PoseEstCamera(Constants.LowCameraName, Constants.FieldLayout, Constants.robotToLowCam, Constants.kSingleTagStdDevs, Constants.kMultiTagStdDevs);
+  private PoseEstCamera HighFCam = new PoseEstCamera(Constants.HighFrontCameraName, Constants.FieldLayout, Constants.robotToHighFrontCam, Constants.kSingleTagStdDevs, Constants.kMultiTagStdDevs);
+  private PoseEstCamera HighBCam = new PoseEstCamera(Constants.HighBackCameraName, Constants.FieldLayout, Constants.robotToHighBackCam, Constants.kSingleTagStdDevs, Constants.kMultiTagStdDevs);
 
   private boolean _DriveRobotRelative = false;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
@@ -150,9 +149,6 @@ public class Drivetrain extends SubsystemBase {
     SmartDashboard.putNumber("FR HEADING", FrontRightModule.getState().angle.getDegrees());
     SmartDashboard.putNumber("BL HEADING", BackLeftModule.getState().angle.getDegrees());
     SmartDashboard.putNumber("BR HEADING", BackRightModule.getState().angle.getDegrees());
-    SmartDashboard.putBoolean("Back Camera On", IsAimingBackCamera);
-    SmartDashboard.putBoolean("High Camera On", IsAimingHighCamera);
-    SmartDashboard.putBoolean("Low Camera On", IsAimingLowCamera);
     SmartDashboard.putBoolean("Facing Reef", facingReef);
     SmartDashboard.putNumber("Wall Distance", wallDistance);
   }
@@ -183,42 +179,6 @@ public class Drivetrain extends SubsystemBase {
     poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
   }
 
-  public Command TurnOnBackCameraCommand(){
-    return runOnce(() -> {
-      IsAimingBackCamera = true;
-    }).asProxy();
-  }
-
-  public Command TurnOffBackCameraCommand(){
-    return runOnce(() -> {
-      IsAimingBackCamera = false;
-    }).asProxy();
-  }
-
-  public Command TurnOnHighFCameraCommand(){
-    return runOnce(() -> {
-      IsAimingHighCamera = true;
-    }).asProxy();
-  }
-
-  public Command TurnOffHighFCameraCommand(){
-    return runOnce(() -> {
-      IsAimingHighCamera = false;
-    }).asProxy();
-  }
-
-  public Command TurnOnLowCameraCommand(){
-    return runOnce(() -> {
-      IsAimingLowCamera = true;
-    }).asProxy();
-  }
-
-  public Command TurnOffLowCameraCommand(){
-    return runOnce(() -> {
-      IsAimingLowCamera = false;
-    }).asProxy();
-  }
-
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return Constants.kDriveKinematics.toChassisSpeeds(getModuleState());
   }
@@ -238,26 +198,26 @@ public class Drivetrain extends SubsystemBase {
   }
 
   private void UptadePoseWithCameras(){
-    var EstimatedLowPose = Cams.getEstimatedPoseLowCamera();
+    var EstimatedLowPose = BottomCam.getEstimatedPose();
     EstimatedLowPose.ifPresent(
       est -> {
-        var estStdDevs = Cams.getLowCameraEstStdDevs();
+        var estStdDevs = BottomCam.getEstStdDevs();
         addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
       }
     );
 
-    var EstimatedHighFrontPose = Cams.getEstimatedPoseHighFrontCamera();
+    var EstimatedHighFrontPose = HighFCam.getEstimatedPose();
     EstimatedHighFrontPose.ifPresent(
       est -> {
-        var estStdDevs = Cams.getHighFrontCameraEstStdDevs();
+        var estStdDevs = HighFCam.getEstStdDevs();
         addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
       }
     );
 
-    var EstimatedHighBackPose = Cams.getEstimatedPoseHighBackCamera();
+    var EstimatedHighBackPose = HighBCam.getEstimatedPose();
     EstimatedHighBackPose.ifPresent(
       est -> {
-        var estStdDevs = Cams.getHighBackCameraEstStdDevs();
+        var estStdDevs = HighBCam.getEstStdDevs();
         addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
       }
     );

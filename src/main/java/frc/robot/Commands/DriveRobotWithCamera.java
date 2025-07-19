@@ -4,21 +4,17 @@
 
 package frc.robot.Commands;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
-import frc.robot.Subsystems.Cameras;
 import frc.robot.Subsystems.Drivetrain;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveRobotWithCamera extends Command {
   private final Drivetrain Drivetrain;
-  private final Cameras Cams;
   private DoubleSupplier XSupplier, YSupplier, RotSupplier;
   private SlewRateLimiter XLimiter = new SlewRateLimiter(Constants.panRateOfChangeLimit);
   private SlewRateLimiter YLimiter = new SlewRateLimiter(Constants.panRateOfChangeLimit);
@@ -26,10 +22,8 @@ public class DriveRobotWithCamera extends Command {
   private Rotation2d rotationTarget = null; // Angle to maintain if driver is not trying to turn
 
   /** Creates a new DriveRobot. */
-  public DriveRobotWithCamera(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier,
-      DoubleSupplier rotSupplier) {
+  public DriveRobotWithCamera(Drivetrain drivetrain, DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier rotSupplier) {
     this.Drivetrain = drivetrain;
-    this.Cams = drivetrain.Cams;
     this.XSupplier = xSupplier;
     this.YSupplier = ySupplier;
     this.RotSupplier = rotSupplier;
@@ -52,12 +46,8 @@ public class DriveRobotWithCamera extends Command {
     double leftMagnatude = Math.sqrt(xRawDemand * xRawDemand + yRawDemand * yRawDemand);
     double rightMagnatude = Math.abs(rotRawDemand);
 
-    // Check if using camera or driver is trying to move
-    boolean isAimingBackCamera = this.Drivetrain.IsAimingBackCamera;
-    boolean isAimingLowCamera = this.Drivetrain.IsAimingLowCamera;
-    boolean IsAimingHighCamera =  this.Drivetrain.IsAimingHighCamera;
 
-    boolean isAiming = isAimingBackCamera || isAimingLowCamera || IsAimingHighCamera;
+    boolean isAiming = false; // TODO when fix aiming come back and deal wit dis 
     boolean isDriving = leftMagnatude > Constants.minThumbstickMagnitude;
     boolean isTurning = rightMagnatude > Constants.minThumbstickMagnitude;
     
@@ -87,46 +77,10 @@ public class DriveRobotWithCamera extends Command {
       rotationTarget = null;
     }
 
-
-    // If back camera is on, look for coral station AprilTags
-    if (isAimingBackCamera) {
-      // Get angle to apriltag camera sees
-      Optional<Double> angle = Cams.getAngleToCoralStation();
-      
-      if (angle.isPresent()) {
-        // Overwrite driver turning command if camera found apriltag
-        rotRawDemand = -1 * Constants.teleCameraHoldFactor * angle.get();
-      }
-    }
-
-    // If high camera is on, look for processor AplriTags
-    if (IsAimingHighCamera) {
-      // Get angle to apriltag camera sees
-      Optional<Double> angle = Cams.getAngleToProcessor();
-
-      if (angle.isPresent()) {
-        // Overwrite driver turning command if camera found apriltag
-        rotRawDemand = -1 * Constants.teleCameraHoldFactor * angle.get();
-      }
-    }
-
-    // If low camera is on, look for reef AprilTags
-    if (isAimingLowCamera) {
-      // Get angle to apriltag camera sees
-      Optional<Double> angle = Cams.getAngleToReef();
-
-      if (angle.isPresent()) {
-        // Overwrite driver turning command if camera found apriltag
-        rotRawDemand = -1 * Constants.teleCameraHoldFactor * (angle.get() - Units.radiansToDegrees(Constants.robotToLowCam.getRotation().getZ()));
-      }
-    }
-
-
     if (isTurning && !isDriving  && !isAiming) {
       // sligtly reduce sensitivity if turning in place
       rotRawDemand = rotRawDemand * 0.9;
     }
-
 
     double xDemand = XLimiter.calculate(xRawDemand * Math.abs(xRawDemand));
     double yDemand = YLimiter.calculate(yRawDemand * Math.abs(yRawDemand));

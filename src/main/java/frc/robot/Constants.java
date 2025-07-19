@@ -4,6 +4,8 @@ import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -187,7 +189,7 @@ public class Constants {
         new Rotation3d(Units.degreesToRadians(180),Units.degreesToRadians(-140),0));
    
   public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4,4,8); // TODO Adjust these standard deviations if necessary
-  public static final Matrix<N3, N1> kSMultiTagStdDevs = VecBuilder.fill(0.5,0.5,1);
+  public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5,0.5,1);
 
   public static final Matrix<N3, N1> kStateStdDevs = VecBuilder.fill(0.1,0.1,0.1);
   public static final Matrix<N3, N1> kVisionStdDevs = VecBuilder.fill(1,1,1);
@@ -214,4 +216,5 @@ public class Constants {
   public static final Translation2d kReefCenterBlue = new Translation2d(4.489, kFieldWidth/2.0);
   public static final Translation2d kReefCenterRed = new Translation2d(kFieldLength-4.489, kFieldWidth/2.0);
   public static final double kFacingReefTolerance = 1.0;
+  public static final AprilTagFieldLayout FieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
 } 
