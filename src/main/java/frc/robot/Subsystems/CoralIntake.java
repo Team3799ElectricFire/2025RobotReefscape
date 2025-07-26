@@ -15,8 +15,10 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import monologue.Logged;
+import monologue.Annotations.Log;
 
-public class CoralIntake extends SubsystemBase {
+public class CoralIntake extends SubsystemBase implements Logged {
   private SparkMax LeftMotor = new SparkMax(Constants.CoralLeftMotorID, MotorType.kBrushless);
   private SparkMax RightMotor = new SparkMax(Constants.CoralRightMotorID, MotorType.kBrushless);
 
@@ -72,11 +74,13 @@ public class CoralIntake extends SubsystemBase {
     LeftMotor.resumeFollowerMode();
     RightMotor.set(0);
   }
-
+  
+  @Log
   public boolean HaveCoral() {
     return !BottomSwitch.isPressed();
   }
 
+  @Log
   public boolean IsSafeCoral() {
     return TopSwitch.isPressed();
   }

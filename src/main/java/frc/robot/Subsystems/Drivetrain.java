@@ -19,9 +19,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -69,24 +66,17 @@ public class Drivetrain extends SubsystemBase implements Logged {
   private boolean _DriveRobotRelative = false;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
-  private final StructArrayPublisher<SwerveModuleState> publisher;
-  private final StructPublisher<Pose2d> posePublisher;
-  private final StructPublisher<Pose2d> reefPublisher;
   
   private Alliance ourAlliance = Alliance.Red;
+  @Log
   public Pose2d reefReference = Pose2d.kZero;
+  @Log
   private boolean facingReef = false;
+  @Log
   private double wallDistance = 0.0;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
-    publisher = NetworkTableInstance.getDefault()
-      .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
-    posePublisher = NetworkTableInstance.getDefault()
-      .getStructTopic("/RobotPose", Pose2d.struct).publish();
-    reefPublisher = NetworkTableInstance.getDefault()
-      .getStructTopic("/ReefReference", Pose2d.struct).publish();
-
     // Autobuilder
     AutoBuilder.configure(
         this::getPose,
@@ -120,7 +110,7 @@ public class Drivetrain extends SubsystemBase implements Logged {
     poseEstimator.update(Pidgey.getRotation2d(), getModulePositions());
 
     // Update pose estimator with info from cameras
-    UptadePoseWithCameras(); // TODO enable here to always use pose estimation from cameras, Auto and teleop
+    UpdatePoseWithCameras();
 
     // Track reef's location
     Translation2d reefCenter = (ourAlliance == Alliance.Blue) ? Constants.kReefCenterBlue : Constants.kReefCenterRed;
@@ -137,22 +127,6 @@ public class Drivetrain extends SubsystemBase implements Logged {
     wallDistance = Math.max(0.0,
         reefAngle.rotateBy(Rotation2d.kPi).minus(reefTranslation.getAngle()).getCos() * reefTranslation.getNorm()
             - Constants.kReefCenterToWallDistance);
-
-    // Send data to driver station
-    publisher.set(getModuleState());
-    posePublisher.set(getPose());
-    reefPublisher.set(reefReference);
-    printDS();
-  }
-
-  private void printDS() {
-    SmartDashboard.putNumber("GYRO ANGLE", getHeading());
-    SmartDashboard.putNumber("FL HEADING", FrontLeftModule.getState().angle.getDegrees());
-    SmartDashboard.putNumber("FR HEADING", FrontRightModule.getState().angle.getDegrees());
-    SmartDashboard.putNumber("BL HEADING", BackLeftModule.getState().angle.getDegrees());
-    SmartDashboard.putNumber("BR HEADING", BackRightModule.getState().angle.getDegrees());
-    SmartDashboard.putBoolean("Facing Reef", facingReef);
-    SmartDashboard.putNumber("Wall Distance", wallDistance);
   }
 
   public void setAlliance(Alliance color) {
@@ -200,7 +174,7 @@ public class Drivetrain extends SubsystemBase implements Logged {
     //UptadePoseWithCameras(); // TODO enable here to only use pose estimation from cameras in Auto, not teleop
   }
 
-  private void UptadePoseWithCameras(){
+  private void UpdatePoseWithCameras(){
     var EstimatedLowPose = BottomCam.getEstimatedPose();
     EstimatedLowPose.ifPresent(
       est -> {
@@ -280,6 +254,7 @@ public class Drivetrain extends SubsystemBase implements Logged {
     BackLeftModule.stop();
   }
 
+  @Log
   public SwerveModuleState[] getModuleState() {
     SwerveModuleState[] states = new SwerveModuleState[4];
     states[0] = FrontRightModule.getState();

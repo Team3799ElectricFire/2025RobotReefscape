@@ -18,13 +18,13 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
-//import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import monologue.Logged;
+import monologue.Annotations.Log;
 
-public class Wrist extends SubsystemBase {
+public class Wrist extends SubsystemBase implements Logged {
   private SparkMax LeftMotor = new SparkMax(Constants.WristLeftMotorID, MotorType.kBrushless);
   private SparkMax RightMotor = new SparkMax(Constants.WristRightMotorID, MotorType.kBrushless);
   private ArmFeedforward FeedForward = new ArmFeedforward(Constants.WristKS, Constants.WristKG, Constants.WristKV);
@@ -77,8 +77,6 @@ public class Wrist extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("WRIST ANGLE", getAngle());
-    SmartDashboard.putBoolean("WRIST HOME", AtHome());
 
     /*if (hasBeenHome) {
       setpoint = profile.calculate(0.02, setpoint, goal);
@@ -109,6 +107,7 @@ public class Wrist extends SubsystemBase {
           FeedForward.calculate(newSetPoint, 0.0));
   }
 
+  @Log
   public boolean AtHome() {
     return HomeSwitch.isPressed();
   }
@@ -132,6 +131,7 @@ public class Wrist extends SubsystemBase {
     }).ignoringDisable(true);
   }
 
+  @Log
   public double getAngle() {
     return RightMotor.getEncoder().getPosition();
   }

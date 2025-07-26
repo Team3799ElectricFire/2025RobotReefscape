@@ -18,12 +18,13 @@ import com.revrobotics.spark.config.LimitSwitchConfig;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import monologue.Logged;
+import monologue.Annotations.Log;
 
-public class Elevator extends SubsystemBase {
+public class Elevator extends SubsystemBase implements Logged {
   private SparkFlex LeftMotor = new SparkFlex(Constants.ElevatorLeftMotorID, MotorType.kBrushless);
   private SparkFlex RightMotor = new SparkFlex(Constants.ElevatorRightMotorID, MotorType.kBrushless);
   private ElevatorFeedforward FeedForward = new ElevatorFeedforward(Constants.ElevatorKS, Constants.ElevatorKG,
@@ -73,12 +74,7 @@ public class Elevator extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    SmartDashboard.putBoolean("Elelvator At Bottom", AtBottom());
-    SmartDashboard.putBoolean("Elevator At Top", AtTop());
-    SmartDashboard.putNumber("Elevator Encoder", getHeight());
-  }
+  public void periodic() {}
 
   public void ElevatorUp() {
     RightMotor.set(Constants.ElevatorSpeed);
@@ -142,6 +138,7 @@ public class Elevator extends SubsystemBase {
     }).asProxy();
   }
 
+  @Log
   public double getHeight() {
     return RightMotor.getEncoder().getPosition();
   }
@@ -150,10 +147,12 @@ public class Elevator extends SubsystemBase {
     return getHeight() < Constants.ElevatorLevel2 - 5.0;
   }
 
+  @Log
   public boolean AtTop() {
     return RightMotor.getForwardLimitSwitch().isPressed();
   }
 
+  @Log
   public boolean AtBottom() {
     return RightMotor.getReverseLimitSwitch().isPressed();
   }

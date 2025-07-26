@@ -16,8 +16,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.Constants;
+import monologue.Logged;
+import monologue.Annotations.Log;
 
-public class SwerveModule {
+public class SwerveModule implements Logged {
     private SparkFlex SteerMotor, DriveMotor;
     private SparkFlexConfig SteerConfig, DriveConfig;
     private AbsoluteEncoder SteerEncoder;
@@ -73,6 +75,7 @@ public class SwerveModule {
         DriveMotor.configure(DriveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
+    @Log
     public SwerveModuleState getState() {
         return new SwerveModuleState(
                 DriveEncoder.getVelocity(),
