@@ -188,8 +188,12 @@ public class Constants {
         new Translation3d(Units.inchesToMeters(-0.648), Units.inchesToMeters(9.239), Units.inchesToMeters(38.239)),
         new Rotation3d(Units.degreesToRadians(180),Units.degreesToRadians(-140),0));
    
-  public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4,4,8); // TODO Adjust these standard deviations if necessary
+  public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(1.5, 1.5,3);
   public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5,0.5,1);
+  public static final double CameraTrustMaxSpeed = 2.0;
+  public static final double CameraTrustMultSpeed = 2.0;
+  public static final double CameraTrustMaxRot = Math.PI * 2.0 / 5.0;
+  public static final double CameraTrustMultRot = 2.0;
 
   public static final Matrix<N3, N1> kStateStdDevs = VecBuilder.fill(0.1,0.1,0.1);
   public static final Matrix<N3, N1> kVisionStdDevs = VecBuilder.fill(1,1,1);

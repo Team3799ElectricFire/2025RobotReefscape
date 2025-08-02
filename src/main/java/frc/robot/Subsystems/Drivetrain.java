@@ -175,7 +175,7 @@ public class Drivetrain extends SubsystemBase implements Logged {
   }
 
   private void UpdatePoseWithCameras() {
-    var EstimatedLowPose = BottomCam.getEstimatedPose();
+    var EstimatedLowPose = BottomCam.getEstimatedPose(getRobotRelativeSpeeds());
     EstimatedLowPose.ifPresent(
       est -> {
         //System.out.println("X: " + Double.toString(est.estimatedPose.toPose2d().getX()) + " | Y: " + Double.toString(est.estimatedPose.toPose2d().getY()) + " | R: " + Double.toString(est.estimatedPose.s));

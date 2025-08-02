@@ -17,8 +17,10 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.Constants;
 
 public class PoseEstCamera {
     private PhotonCamera Camera;
@@ -53,6 +55,22 @@ public class PoseEstCamera {
         for (var frame : Camera.getAllUnreadResults()) {
             visionEst = PoseEstimator.update(frame);
             updateStdDevs(visionEst, frame.getTargets());
+        }
+        return visionEst;
+    }
+
+    public Optional<EstimatedRobotPose> getEstimatedPose(ChassisSpeeds speeds) {
+        // Initialize empty Optional variable representing the estimated robot pose
+        Optional<EstimatedRobotPose> visionEst = Optional.empty();
+
+        /*
+         * For each frame camera has processed, use this camera's PhotonPoseEstimator
+         * to update estimated robot pose and standard deviation of that estimated pose.
+         * Each camera maintains its' own estimation.
+         */
+        for (var frame : Camera.getAllUnreadResults()) {
+            visionEst = PoseEstimator.update(frame);
+            updateStdDevs(visionEst, frame.getTargets(), speeds);
         }
         return visionEst;
     }
@@ -93,6 +111,53 @@ public class PoseEstCamera {
                     estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
                 CurStdDevs = estStdDevs;
             }
+        }
+    }
+
+    private void updateStdDevs(Optional<EstimatedRobotPose> estimatedPose, List<PhotonTrackedTarget> targets, ChassisSpeeds speeds) {
+        if (estimatedPose.isEmpty()) {
+            CurStdDevs = kSingleTagStdDevs;
+        } else {
+            var estStdDevs = kSingleTagStdDevs;
+
+            int numTags = 0;
+            double avgDist = 0;
+            for (var tgt : targets) {
+                // Get the pose of the tag seen
+                var tagPose = PoseEstimator.getFieldTags().getTagPose(tgt.getFiducialId());
+
+                // If tag seen is not part of the field, ignore it and go to the next target
+                if (tagPose.isEmpty())
+                    continue;
+
+                numTags++;
+                avgDist += tagPose.get().toPose2d().getTranslation().getDistance(
+                        estimatedPose.get().estimatedPose.toPose2d().getTranslation());
+            }
+
+            // if No tags visible. keep Default single-tag std devs
+            if (numTags != 0) {
+                // One or more tags visible, run the full heuristic.
+                avgDist /= numTags;
+                // Decrease std devs if multiple targets are visible
+                if (numTags > 1)
+                    estStdDevs = kMultiTagStdDevs;
+                // Increase std devs based on (average) distance
+                if (numTags == 1 && avgDist > 4)
+                    estStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+                else
+                    estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30));
+            }
+
+            // check if robo move n groove
+            var mag = Math.sqrt(speeds.vyMetersPerSecond * speeds.vyMetersPerSecond + speeds.vxMetersPerSecond * speeds.vxMetersPerSecond);
+            if (mag > Constants.CameraTrustMaxSpeed)
+                estStdDevs = estStdDevs.times(Constants.CameraTrustMultSpeed);
+
+            if (speeds.omegaRadiansPerSecond > Constants.CameraTrustMaxRot);
+                estStdDevs = estStdDevs.times(Constants.CameraTrustMultRot);
+
+            CurStdDevs = estStdDevs;
         }
     }
 
