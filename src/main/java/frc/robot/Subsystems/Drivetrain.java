@@ -59,10 +59,6 @@ public class Drivetrain extends SubsystemBase implements Logged {
     Constants.kStateStdDevs,
     Constants.kVisionStdDevs);
 
-  private PoseEstCamera BottomCam = new PoseEstCamera(Constants.LowCameraName, Constants.FieldLayout, Constants.robotToLowCam, Constants.kSingleTagStdDevs, Constants.kMultiTagStdDevs);
-  private PoseEstCamera HighFCam = new PoseEstCamera(Constants.HighFrontCameraName, Constants.FieldLayout, Constants.robotToHighFrontCam, Constants.kSingleTagStdDevs, Constants.kMultiTagStdDevs);
-  private PoseEstCamera HighBCam = new PoseEstCamera(Constants.HighBackCameraName, Constants.FieldLayout, Constants.robotToHighBackCam, Constants.kSingleTagStdDevs, Constants.kMultiTagStdDevs);
-
   private boolean _DriveRobotRelative = false;
   private double SpeedMultiple = Constants.LowSpeedMultiple;
   private Translation2d RotationCenter = new Translation2d();
@@ -79,27 +75,28 @@ public class Drivetrain extends SubsystemBase implements Logged {
   public Drivetrain() {
     // Autobuilder
     AutoBuilder.configure(
-        this::getPose,
-        this::resetPose,
-        this::getRobotRelativeSpeeds,
-        this::driveRobotRelative,
-        new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-            Constants.TranslationPIDconstants,
-            Constants.RotationPIDconstants),
-        Constants.ROBOTCONFIG,
-        () -> {
-          // Boolean supplier that controls when the path will be mirrored for the red
-          // alliance
-          // This will flip the path being followed to the red side of the field.
-          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+      this::getPose,
+      this::resetPose,
+      this::getRobotRelativeSpeeds,
+      this::driveRobotRelative,
+      new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+          Constants.TranslationPIDconstants,
+          Constants.RotationPIDconstants),
+      Constants.ROBOTCONFIG,
+      () -> {
+        // Boolean supplier that controls when the path will be mirrored for the red
+        // alliance
+        // This will flip the path being followed to the red side of the field.
+        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-          var alliance = DriverStation.getAlliance();
-          if (alliance.isPresent()) {
-            return alliance.get() == DriverStation.Alliance.Red;
-          }
-          return false;
-        },
-        this);
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
+      },
+      this
+    );
   }
 
   @Override
@@ -108,9 +105,6 @@ public class Drivetrain extends SubsystemBase implements Logged {
     
     // Update pose estimator with info from gyro and swerve modules
     poseEstimator.update(Pidgey.getRotation2d(), getModulePositions());
-
-    // Update pose estimator with info from cameras
-    UpdatePoseWithCameras();
 
     // Track reef's location
     Translation2d reefCenter = (ourAlliance == Alliance.Blue) ? Constants.kReefCenterBlue : Constants.kReefCenterRed;
@@ -151,11 +145,6 @@ public class Drivetrain extends SubsystemBase implements Logged {
     poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
-  public void addVisionMeasurement(Pose2d visionRobotPoseMeters,
-      double timestampSeconds) {
-    poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds);
-  }
-
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return Constants.kDriveKinematics.toChassisSpeeds(getModuleState());
   }
@@ -170,34 +159,6 @@ public class Drivetrain extends SubsystemBase implements Logged {
     FrontLeftModule.setDesiredState(moduleStates[1]);
     BackRightModule.setDesiredState(moduleStates[2]);
     BackLeftModule.setDesiredState(moduleStates[3]);
-
-    //UptadePoseWithCameras(); // TODO enable here to only use pose estimation from cameras in Auto, not teleop
-  }
-
-  private void UpdatePoseWithCameras(){
-    var EstimatedLowPose = BottomCam.getEstimatedPose();
-    EstimatedLowPose.ifPresent(
-      est -> {
-        var estStdDevs = BottomCam.getEstStdDevs();
-        addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-      }
-    );
-
-    var EstimatedHighFrontPose = HighFCam.getEstimatedPose();
-    EstimatedHighFrontPose.ifPresent(
-      est -> {
-        var estStdDevs = HighFCam.getEstStdDevs();
-        addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-      }
-    );
-
-    var EstimatedHighBackPose = HighBCam.getEstimatedPose();
-    EstimatedHighBackPose.ifPresent(
-      est -> {
-        var estStdDevs = HighBCam.getEstStdDevs();
-        addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
-      }
-    );
   }
 
   public void driveRobotRelative(double xSpeed, double ySpeed, double rot) {

@@ -24,6 +24,7 @@ public class Robot extends TimedRobot implements Logged {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
+    DriverStation.silenceJoystickConnectionWarning(true);
     m_robotContainer = new RobotContainer();
   }
 
@@ -36,12 +37,15 @@ public class Robot extends TimedRobot implements Logged {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-     // setFileOnly is used to shut off NetworkTables broadcasting for most logging calls.
+    
+    // setFileOnly is used to shut off NetworkTables broadcasting for most logging calls.
     // Basing this condition on the connected state of the FMS is a suggestion only.
     Monologue.setFileOnly(DriverStation.isFMSAttached());
     // This method needs to be called periodically, or no logging annotations will
     // process properly.
     Monologue.updateAll();
+
+    m_robotContainer.correctOdometry();
   }
 
   @Override

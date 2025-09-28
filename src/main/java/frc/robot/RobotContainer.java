@@ -4,9 +4,17 @@
 
 package frc.robot;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,10 +24,12 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Commands.*;
 import frc.robot.Subsystems.*;
+import frc.robot.Subsystems.Vision.VisionSample;
 import monologue.Logged;
 
 public class RobotContainer implements Logged {
   private Drivetrain Drivetrain = new Drivetrain();
+  private Vision vision = new Vision(Vision.camerasFromConfigs(VisionConstants.CONFIGS));
   private CoralIntake CoralIntake = new CoralIntake();
   private Climber Climber = new Climber();
   private AlgaeIntake Algae = new AlgaeIntake();
@@ -29,6 +39,14 @@ public class RobotContainer implements Logged {
   private CommandXboxController Driver = new CommandXboxController(0);
   private CommandXboxController Copilot = new CommandXboxController(1);
   private final SendableChooser<Command> autoChooser;
+
+  // Vision publishers
+  StructPublisher<Pose2d> cameraEstimatedPosePublisher1 = NetworkTableInstance.getDefault()
+      .getStructTopic("Camera1_EstimatedPose", Pose2d.struct).publish();
+  StructPublisher<Pose2d> cameraEstimatedPosePublisher2 = NetworkTableInstance.getDefault()
+      .getStructTopic("Camera2_EstimatedPose", Pose2d.struct).publish();
+  List<StructPublisher<Pose2d>> cameraEstimatedPosesPublisher = Arrays.asList(cameraEstimatedPosePublisher1, cameraEstimatedPosePublisher2);  
+
 
   public RobotContainer() {
     // named comands for pathplanner
@@ -151,5 +169,25 @@ public class RobotContainer implements Logged {
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
+  }
+
+  public void correctOdometry() {
+    List<VisionSample> visionSamples = vision.flushSamples();
+    vision.updateSpeeds(Drivetrain.getRobotRelativeSpeeds());
+
+    for (var sample : visionSamples) {
+      double thetaStdDev = sample.weight() > 0.9 ? 10.0 : 99999.0;
+      Drivetrain.addVisionMeasurement(
+        sample.pose(), 
+        sample.timestamp(), 
+        VecBuilder.fill(0.1 / sample.weight(), 0.1 / sample.weight(), thetaStdDev)
+      );
+    }
+
+    for (int i = 0; i < 2; i++){
+      if (i+1 <= visionSamples.size()){
+        cameraEstimatedPosesPublisher.get(i).set(visionSamples.get(i).pose());
+      }
+    }
   }
 }
