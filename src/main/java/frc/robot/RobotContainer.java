@@ -143,7 +143,7 @@ public class RobotContainer implements Logged {
     ));
 
     // Cameras
-    
+    Copilot.povUp().whileTrue(Drivetrain.faceReefCommand());
 
     // Driver Assist
     Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, Copilot::getLeftX));

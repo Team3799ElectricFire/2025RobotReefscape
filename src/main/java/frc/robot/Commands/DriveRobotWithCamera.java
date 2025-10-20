@@ -47,7 +47,7 @@ public class DriveRobotWithCamera extends Command {
     double rightMagnatude = Math.abs(rotRawDemand);
 
 
-    boolean isAiming = false; // TODO when fix aiming come back and deal wit dis 
+    boolean isAiming = Drivetrain.TurningToReef;
     boolean isDriving = leftMagnatude > Constants.minThumbstickMagnitude;
     boolean isTurning = rightMagnatude > Constants.minThumbstickMagnitude;
     
@@ -77,17 +77,27 @@ public class DriveRobotWithCamera extends Command {
       rotationTarget = null;
     }
 
+
+    //copilot button aim at reef
+    if (isAiming) {
+      Rotation2d FaceReef = Drivetrain.reefReference.getRotation();
+      Rotation2d error = FaceReef.minus(Drivetrain.getPose().getRotation());
+      rotRawDemand = error.getDegrees() * Constants.teleAngleHoldFactor;
+    }
+
+
+    // sligtly reduce sensitivity if turning in place
     if (isTurning && !isDriving  && !isAiming) {
-      // sligtly reduce sensitivity if turning in place
       rotRawDemand = rotRawDemand * 0.9;
     }
+
 
     double xDemand = XLimiter.calculate(xRawDemand * Math.abs(xRawDemand));
     double yDemand = YLimiter.calculate(yRawDemand * Math.abs(yRawDemand));
     double rotDemand = RotLimiter.calculate(rotRawDemand * Math.abs(rotRawDemand));
 
-    // Only command the modules to move if the driver input is far enough from
-    // center
+
+    // Only command the modules to move if the driver input is far enough from center
     if (isDriving || isTurning || isAiming) {
       // Drive
       if (Drivetrain.getDriveRobotRelative()) {

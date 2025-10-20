@@ -75,6 +75,8 @@ public class Drivetrain extends SubsystemBase implements Logged {
   @Log
   private double wallDistance = 0.0;
 
+  public boolean TurningToReef = false;
+
   /** Creates a new Drivetrain. */
   public Drivetrain() {
     // Autobuilder
@@ -397,6 +399,12 @@ public class Drivetrain extends SubsystemBase implements Logged {
 
   public boolean epsilonEquals(double a, double b, double epsilon) {
     return (a-epsilon <= b) && (a+epsilon >= b);
+  }
+
+  public Command faceReefCommand() {
+    return startEnd(
+    () -> {this.TurningToReef = true;},
+    () -> {this.TurningToReef = false;}).asProxy();
   }
 
 }
