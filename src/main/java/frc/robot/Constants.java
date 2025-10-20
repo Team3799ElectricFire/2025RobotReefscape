@@ -45,7 +45,7 @@ public class Constants {
     public static final double kFrontRightChassisAngularOffset = 0.7922185; // CAN ID 7
     public static final double kFrontLeftChassisAngularOffset = 0.2272288; // CAN ID 1
     public static final double kBackRightChassisAngularOffset = 0.4184715; // CAN ID 5
-    public static final double kBackLeftChassisAngularOffset = 0.0312085;  // CAN ID 3
+    public static final double kBackLeftChassisAngularOffset = 0.9716559;  // CAN ID 3
 
     // CanbusID
     public static final int FrontRightDriveMotorID = 8;

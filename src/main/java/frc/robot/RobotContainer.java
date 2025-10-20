@@ -129,16 +129,16 @@ public class RobotContainer implements Logged {
       Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
     ));
 
-    Copilot.povDown().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1).alongWith(
+    Copilot.a().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel1).alongWith(
       Drivetrain.setDriveSpeeCommand(Constants.HighSpeedMultiple)
     ));
-    Copilot.povLeft().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2).alongWith(
+    Copilot.x().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel2).alongWith(
       Drivetrain.setDriveSpeeCommand(Constants.L2SpeedMultiple)
     ));
-    Copilot.povRight().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3).alongWith(
+    Copilot.b().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel3).alongWith(
       Drivetrain.setDriveSpeeCommand(Constants.L3SpeedMultiple)
     ));
-    Copilot.povUp().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4).alongWith(
+    Copilot.y().onTrue(Elevate.GoToPositionCommand(Constants.ElevatorLevel4).alongWith(
       Drivetrain.setDriveSpeeCommand(Constants.L4SpeedMultiple)
     ));
 
