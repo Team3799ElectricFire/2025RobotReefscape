@@ -181,7 +181,7 @@ public class Drivetrain extends SubsystemBase implements Logged {
     EstimatedLowPose.ifPresent(
       est -> {
         //System.out.println("X: " + Double.toString(est.estimatedPose.toPose2d().getX()) + " | Y: " + Double.toString(est.estimatedPose.toPose2d().getY()) + " | R: " + Double.toString(est.estimatedPose.s));
-        System.out.println(est.estimatedPose.toPose2d().toString());
+       // System.out.println(est.estimatedPose.toPose2d().toString());
         var estStdDevs = BottomCam.getEstStdDevs();
         addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
       }
