@@ -76,6 +76,8 @@ public class Drivetrain extends SubsystemBase implements Logged {
   private double wallDistance = 0.0;
 
   public boolean TurningToReef = false;
+  @Log
+  public String ActiveCommand;
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
@@ -129,6 +131,11 @@ public class Drivetrain extends SubsystemBase implements Logged {
     wallDistance = Math.max(0.0,
         reefAngle.rotateBy(Rotation2d.kPi).minus(reefTranslation.getAngle()).getCos() * reefTranslation.getNorm()
             - Constants.kReefCenterToWallDistance);
+
+    var active = this.getCurrentCommand();
+    if (active != null) {
+      ActiveCommand = active.getName();
+    }
   }
 
   public void setAlliance(Alliance color) {
@@ -402,9 +409,12 @@ public class Drivetrain extends SubsystemBase implements Logged {
   }
 
   public Command faceReefCommand() {
-    return startEnd(
-    () -> {this.TurningToReef = true;},
-    () -> {this.TurningToReef = false;}).asProxy();
+    return runOnce(
+    () -> {this.TurningToReef = true;});
   }
 
+  public Command stopLookingAtReef() {
+    return runOnce(
+      () -> {this.TurningToReef = false;});
+  }
 }

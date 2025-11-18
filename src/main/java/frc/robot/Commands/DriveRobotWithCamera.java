@@ -82,7 +82,7 @@ public class DriveRobotWithCamera extends Command {
     if (isAiming) {
       Rotation2d FaceReef = Drivetrain.reefReference.getRotation();
       Rotation2d error = FaceReef.minus(Drivetrain.getPose().getRotation());
-      rotRawDemand = error.getDegrees() * Constants.teleAngleHoldFactor;
+      rotRawDemand = error.getDegrees() * Constants.teleCameraHoldFactor;
     }
 
 

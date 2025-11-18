@@ -143,10 +143,11 @@ public class RobotContainer implements Logged {
     ));
 
     // Cameras
-    Copilot.povUp().whileTrue(Drivetrain.faceReefCommand());
+    Copilot.povUp().onTrue(Drivetrain.faceReefCommand());
+    Copilot.povUp().onFalse(Drivetrain.stopLookingAtReef());
 
     // Driver Assist
-    Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, Copilot::getLeftX));
+    // Copilot.leftTrigger().whileTrue(new AlignToReefTagRelative(Drivetrain, Copilot::getLeftX));
   }
 
   public Command getAutonomousCommand() {
